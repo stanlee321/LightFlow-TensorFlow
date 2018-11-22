@@ -4,22 +4,19 @@ import random
 import struct
 import cv2
 import numpy as np
-
+from time import time
 import tensorflow as tf
+
 from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.callbacks import ModelCheckpoint, LearningRateScheduler
 from tensorflow.keras.callbacks import EarlyStopping 
+from tensorflow.keras.callbacks import TensorBoard
 
 from model.lightflow import LightFlow
 
 
 path = "model"
-dir0 = '20181119_1'
 net_name = 'lightflow'
-dir_restore = os.path.join(path, 
-                            net_name,
-                            dir0, 
-                            'model-6250')
 
 dir_data = '/home/ubuntu/Data/dataset/FlyingChairs/data/'
 
@@ -161,35 +158,23 @@ def main():
         x2_v.append(x2_b)
         x3_v.append(x3_b)
 
-    x1_t, x2_t, x3_t = dataset_t.next_batch()
-
-    X_train = tf.concat([x1_t, x2_t], axis=3)
-    Y_train = x3_t
-
-
-    print('X_train:', X_train)
-    print('Y_train', Y_train)
-
-    """
-
-    #epochs_arr  = [   20,      5,      5]
-    #learn_rates = [0.001, 0.0003, 0.0001, 0.00001]
     for epoch in range(epoch_max):
         lr_decay = 0.1 ** (epoch / epoch_lr_decay)
         lr = lr_base * lr_decay
-        for iteration in xrange(iter_per_epoch):
+        for iteration in range(iter_per_epoch):
             # time_start = time.time()
             global_iter = epoch * iter_per_epoch + iteration
             
-            optimizer = SGD(nesterov=True, lr=learn_rate, momentum=0.1, decay=0.001)
+            optimizer = SGD(nesterov=True, lr=lr, momentum=0.1, decay=0.001)
             INPUT_SHAPE = (512,384,6)
             model = LightFlow.build(input_shape=INPUT_SHAPE)
             model.compile(optimizer=optimizer,loss='mean_squared_error')
 
-            callbacks = [EarlyStopping(monitor='val_loss', patience=2, verbose=1),
-                    ModelCheckpoint(weights_path, monitor='val_loss', save_best_only=True, verbose=2)]
+            weights_path = path + net_name + 'c-{epoch:02d}-{loss:.4f}.h5'
 
-        
+            callbacks = [EarlyStopping(monitor='val_loss', patience=2, verbose=1),
+                    ModelCheckpoint(weights_path, monitor='val_loss', save_best_only=True, verbose=2),
+                    TensorBoard(log_dir="logs/{}".format(time()), histogram_freq=0, write_graph=True, write_images=True)]
 
             x1_t, x2_t, x3_t = dataset_t.next_batch()
 
@@ -198,17 +183,10 @@ def main():
 
             X_val = tf.concat([x1_v, x2_v], axis=3)
             Y_val = x3_v
-            
-            model.fit(x = X_train, y= Y_train, validation_data=(X_val, Y_val),
-                batch_size=256, verbose=2, epochs=epochs, callbacks=callbacks, shuffle=True)
-            
 
-            print('X_train:', X_train)
-            print('Y_train', Y_train)
-            print('............')
-            print('X_train:', X_val)
-            print('Y_train', Y_val)
-    """
+            model.fit(x = X_train, y= Y_train, validation_data=(X_val, Y_val),
+                batch_size=256, verbose=2, epochs=epoch, callbacks=callbacks, shuffle=True)
+
 if __name__ == '__main__':
     main()
     
