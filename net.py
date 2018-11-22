@@ -162,26 +162,39 @@ def main():
         x3_v.append(x3_b)
 
 
-    epochs_arr  = [   20,      5,      5]
-    learn_rates = [0.001, 0.0003, 0.0001, 0.00001]
+    #epochs_arr  = [   20,      5,      5]
+    #learn_rates = [0.001, 0.0003, 0.0001, 0.00001]
+    for epoch in range(epoch_max):
+        lr_decay = 0.1 ** (epoch / epoch_lr_decay)
+        lr = lr_base * lr_decay
+        for iteration in xrange(iter_per_epoch):
+            # time_start = time.time()
+            global_iter = epoch * iter_per_epoch + iteration
+            """
+            optimizer = SGD(nesterov=True, lr=learn_rate, momentum=0.1, decay=0.001)
+            INPUT_SHAPE = (512,384,6)
+            model = LightFlow.build(input_shape=INPUT_SHAPE)
+            model.compile(optimizer=optimizer,loss='mean_squared_error')
 
-    for learn_rate, epochs in zip(learn_rates, epochs_arr):
-        optimizer = SGD(nesterov=True, lr=learn_rate, momentum=0.1, decay=0.001)
-        INPUT_SHAPE = (512,384,6)
-        model = LightFlow.build(input_shape=INPUT_SHAPE)
-        model.compile(optimizer=optimizer,loss='mean_squared_error')
+            callbacks = [EarlyStopping(monitor='val_loss', patience=2, verbose=1),
+                    ModelCheckpoint(weights_path, monitor='val_loss', save_best_only=True, verbose=2)]
 
-        callbacks = [EarlyStopping(monitor='val_loss', patience=2, verbose=1),
-                 ModelCheckpoint(weights_path, monitor='val_loss', save_best_only=True, verbose=2)]
+            """
 
+            x1_t, x2_t, x3_t = dataset_t.next_batch()
 
-        x1_t, x2_t, x3_t = dataset_t.next_batch()
+            X_train = tf.concat([x1_t, x2_t], axis=3)
+            Y_train = x3_t
 
-        X_train = tf.concat([x1_t, x2_t], axis=3)
-        Y_train = x3_t
+            X_val = tf.concat([x1_v, x2_v], axis=3)
+            Y_val = x3_v
+            """
+            model.fit(x = X_train, y= Y_train, validation_data=(X_val, Y_val),
+                batch_size=256, verbose=2, epochs=epochs, callbacks=callbacks, shuffle=True)
+            """
 
-        X_val = tf.concat([x1_v, x2_v], axis=3)
-        Y_val = x3_v
-
-        model.fit(x = X_train, y= Y_train, validation_data=(X_val, Y_val),
-            batch_size=256, verbose=2, epochs=epochs, callbacks=callbacks, shuffle=True)
+            print('X_train:', X_train)
+            print('Y_train', Y_train)
+            print('............')
+            print('X_train:', X_val)
+            print('Y_train', Y_val)
