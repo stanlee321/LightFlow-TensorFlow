@@ -190,7 +190,8 @@ def main():
             Y_val = x3_v[0]
 
             model.fit(x = X_train, y= Y_train, validation_data=(X_val, Y_val),
-                batch_size=256, verbose=2, epochs=epoch, callbacks=callbacks, shuffle=True)
+                batch_size=256, verbose=2, epochs=epoch, callbacks=callbacks, shuffle=True, 
+                steps_per_epoch=int(epoch/batch_size))
 
 if __name__ == '__main__':
     main()
