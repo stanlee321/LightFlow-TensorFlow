@@ -186,8 +186,8 @@ def main():
             X_train = tf.concat([x1_t, x2_t], axis=3)
             Y_train = x3_t
 
-            X_val = tf.concat([x1_v, x2_v], axis=3)
-            Y_val = x3_v
+            X_val = tf.concat([x1_v[0], x2_v[0]], axis=3)
+            Y_val = x3_v[0]
 
             model.fit(x = X_train, y= Y_train, validation_data=(X_val, Y_val),
                 batch_size=256, verbose=2, epochs=epoch, callbacks=callbacks, shuffle=True)
