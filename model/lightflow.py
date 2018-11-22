@@ -10,7 +10,7 @@ from tensorflow.image import resize_nearest_neighbor
 from tensorflow.keras import Model
 from keras.utils.vis_utils import plot_model
 # Import Own Lib
-from depthwise_conv2d import DepthwiseConvolution2D
+from .depthwise_conv2d import DepthwiseConvolution2D
 
 
 def _depthwise_convolution2D(input, alpha, deepwise_filter_size, kernel_size, strides, padding='same', bias=False):
