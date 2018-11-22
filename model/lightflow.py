@@ -193,13 +193,13 @@ class LightFlow:
         #    'predicted_flow': average
         #}
         # Create model for debug
-        model = Model(inputs=input_image, outputs=average)
+        model = Model(input=input_image, outputs=average)
 
         return model
 
 
 def main(plot = True):
-    INPUT_SHAPE = (512,384,6)
+    INPUT_SHAPE = (384, 512,6)
     model = LightFlow.build(input_shape=INPUT_SHAPE)
     if plot is True:
         plot_model(model, to_file='LightFLow.png', show_shapes=True)
