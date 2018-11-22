@@ -16,7 +16,12 @@ from model.lightflow import LightFlow
 
 
 path = "model"
+dir0 = '20181119_1'
 net_name = 'lightflow'
+dir_restore = os.path.join(path, 
+                            net_name,
+                            dir0, 
+                            'model-6250')
 
 dir_data = '/home/ubuntu/Data/dataset/FlyingChairs/data/'
 
