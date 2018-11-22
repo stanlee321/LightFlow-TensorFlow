@@ -162,7 +162,8 @@ def main():
         x1_v.append(x1_b)
         x2_v.append(x2_b)
         x3_v.append(x3_b)
-
+    INPUT_SHAPE = (384, 512, 6)
+    model = LightFlow.build(input_shape=INPUT_SHAPE)
     for epoch in range(epoch_max):
         lr_decay = 0.1 ** (epoch / epoch_lr_decay)
         lr = lr_base * lr_decay
@@ -171,8 +172,6 @@ def main():
             global_iter = epoch * iter_per_epoch + iteration
             
             optimizer = SGD(nesterov=True, lr=lr, momentum=0.1, decay=0.001)
-            INPUT_SHAPE = (512,384,6)
-            model = LightFlow.build(input_shape=INPUT_SHAPE)
             model.compile(optimizer=optimizer,loss='mean_squared_error')
 
             weights_path = path + net_name + 'c-{epoch:02d}-{loss:.4f}.h5'
