@@ -198,3 +198,7 @@ def main():
             print('............')
             print('X_train:', X_val)
             print('Y_train', Y_val)
+
+if __name__ == '__main__':
+    main()
+    
