@@ -21,7 +21,7 @@ dir_restore = os.path.join(path,
                             dir0, 
                             'model-6250')
 
-dir_data = '/media/csc105/Data/dataset/FlyingChairs/data/'
+dir_data = 'Data/dataset/FlyingChairs/data/'
 
 lr_base = 1e-3              # initial learning rate
 epoch_lr_decay = 500        # every # epoch, lr will decay 0.1
