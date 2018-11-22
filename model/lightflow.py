@@ -55,14 +55,8 @@ class LightFlow:
 
     @staticmethod
     def build(input_tensor = None, input_shape=None, plot=False):
-        if input_tensor is None:
-            input_image = Input(shape=input_shape)
-        else:
-            if not K.is_keras_tensor(input_tensor):
-                input_image = Input(tensor=input_tensor, shape=input_shape)
-            else:
-                input_image = input_tensor
-
+       
+        input_image = Input(shape=input_shape)
         concat_axis = 3
         alpha = 1.0
 
@@ -178,6 +172,13 @@ class LightFlow:
         conv14_resized_tensor_x4 = Lambda(resize_like, arguments={'ref_tensor':conv14, 'scale': 4})(conv14)
         conv15_resized_tensor_x2 = Lambda(resize_like, arguments={'ref_tensor':conv15, 'scale': 2})(conv15)
 
+        print('Get internal shape')
+        print('conv12_resizedx16', K.int_shape(conv12_resized_tensor_x16))
+        print('conv12_resizedx8', K.int_shape(conv13_resized_tensor_x8))
+        print('conv12_resizedx4', K.int_shape(conv14_resized_tensor_x4))
+        print('conv12_resizedx2', K.int_shape(conv15_resized_tensor_x2))
+        print('conv16', K.int_shape(conv16))
+
         average = Add()([conv12_resized_tensor_x16, 
                                 conv13_resized_tensor_x8, 
                                 conv14_resized_tensor_x4 ,
@@ -193,7 +194,7 @@ class LightFlow:
         #    'predicted_flow': average
         #}
         # Create model for debug
-        model = Model(input=input_image, outputs=average)
+        model = Model(inputs=input_image, outputs=average, name='lightflow')
 
         return model
 
