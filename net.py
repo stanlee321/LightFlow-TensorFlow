@@ -106,7 +106,7 @@ class Data(object):
         self.shuffle = shuffle
         self.minus_mean = minus_mean
         if self.shuffle:
-            random.shuffle(self.index_total)
+            random.shuffle(list(self.index_total))
 
     def read_flow(self, name):
         f = open(name, "rb")
