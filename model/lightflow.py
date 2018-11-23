@@ -9,6 +9,7 @@ from tensorflow.keras.layers import Concatenate, UpSampling2D
 from tensorflow.image import resize_nearest_neighbor
 from tensorflow.keras import Model
 from keras.utils.vis_utils import plot_model
+from keras.engine.topology import get_source_inputs
 # Import Own Lib
 from .depthwise_conv2d import DepthwiseConvolution2D
 
@@ -172,27 +173,19 @@ class LightFlow:
         conv14_resized_tensor_x4 = Lambda(resize_like, arguments={'ref_tensor':conv14, 'scale': 4})(conv14)
         conv15_resized_tensor_x2 = Lambda(resize_like, arguments={'ref_tensor':conv15, 'scale': 2})(conv15)
 
-        print('Get internal shape')
-        print('conv12_resizedx16', K.int_shape(conv12_resized_tensor_x16))
-        print('conv12_resizedx8', K.int_shape(conv13_resized_tensor_x8))
-        print('conv12_resizedx4', K.int_shape(conv14_resized_tensor_x4))
-        print('conv12_resizedx2', K.int_shape(conv15_resized_tensor_x2))
-        print('conv16', K.int_shape(conv16))
-
         average = Add()([conv12_resized_tensor_x16, 
                                 conv13_resized_tensor_x8, 
                                 conv14_resized_tensor_x4 ,
                                 conv15_resized_tensor_x2, 
                                 conv16])
 
-        # optimizer = SGD(nesterov=True, lr=0.00001, momentum=0.1,decay=0.001)
-        # model = Model(inputs = [input_l, input_r], outputs = conv6)
-        # model.compile(optimizer=optimizer,loss='mean_squared_error')
-        # print "Done"
-        
-        #return {
-        #    'predicted_flow': average
-        #}
+        # Ensure that the model takes into account
+        # any potential predecessors of `input_tensor`.
+        if input_tensor is not None:
+            input_image = get_source_inputs(input_tensor)
+        else:
+            pass
+
         # Create model for debug
         model = Model(inputs=input_image, outputs=average, name='lightflow')
 
