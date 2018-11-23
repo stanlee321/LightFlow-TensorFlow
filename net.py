@@ -11,8 +11,7 @@ from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.callbacks import ModelCheckpoint, LearningRateScheduler
 from tensorflow.keras.callbacks import EarlyStopping 
 from tensorflow.keras.callbacks import TensorBoard
-from tensorflow.keras import backend as K
-
+from keras import backend as K
 from model.lightflow import LightFlow
 
 
