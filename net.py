@@ -11,6 +11,7 @@ from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.callbacks import ModelCheckpoint, LearningRateScheduler
 from tensorflow.keras.callbacks import EarlyStopping 
 from tensorflow.keras.callbacks import TensorBoard
+from tensorflow.keras import backend as K
 
 from model.lightflow import LightFlow
 
@@ -184,10 +185,13 @@ def main():
 
             X_train = tf.concat([x1_t, x2_t], axis=3)
             Y_train = x3_t
+            print('Input shape TRAIN', K.input_shape(X_train))
+            print('OUT shape TRAIN', K.input_shape(Y_train))
 
             X_val = tf.concat([x1_v[0], x2_v[0]], axis=3)
             Y_val = x3_v[0]
-
+            print('Input shape VAL', K.input_shape(X_val))
+            print('OUT shape VAL', K.input_shape(Y_val))
             model.fit(x = X_train, y= Y_train, validation_data=(X_val, Y_val),
                 batch_size=256, verbose=2, epochs=epoch, callbacks=callbacks, shuffle=True, 
                 steps_per_epoch=int(epoch/batch_size))
