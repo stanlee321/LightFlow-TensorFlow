@@ -179,6 +179,8 @@ class LightFlow:
                                 conv15_resized_tensor_x2, 
                                 conv16])
 
+        # Fuse GT with prediction
+        average = Lambda(resize_like, arguments={'ref_tensor':average, 'scale': 4})(average)
         # Ensure that the model takes into account
         # any potential predecessors of `input_tensor`.
         if input_tensor is not None:

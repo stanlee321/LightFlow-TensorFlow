@@ -6,12 +6,11 @@ import cv2
 import numpy as np
 from time import time
 import tensorflow as tf
-
 from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.callbacks import ModelCheckpoint, LearningRateScheduler
 from tensorflow.keras.callbacks import EarlyStopping 
 from tensorflow.keras.callbacks import TensorBoard
-from keras import backend as K
+from tensorflow.keras import backend as K
 from model.lightflow import LightFlow
 
 
@@ -23,17 +22,20 @@ dir_restore = os.path.join(path,
                             dir0, 
                             'model-6250')
 
-dir_data = '/home/ubuntu/Data/dataset/FlyingChairs/data/'
+
+cwd = os.environ['HOME']
+
+dir_data = os.path.join(cwd, 'Data/dataset/FlyingChairs/data/')
 
 lr_base = 1e-3              # initial learning rate
 epoch_lr_decay = 500        # every # epoch, lr will decay 0.1
 epoch_max = 5               # max epoch
 max_to_keep = 5             # number of model to save
-batch_size = 32             # bs
-train_pairs_number = 20000  # number of train samples
+batch_size = 32             #256, # bs
+train_pairs_number = 100 #20000  # number of train samples
 val_iter = 2                # validation batch
 use_gpu_1 = False
-W, H = 512, 384
+W, H =   512, 384
 val_pairs_number = batch_size * val_iter
 iter_per_epoch = train_pairs_number // batch_size
 epoch_save = epoch_max // max_to_keep
@@ -69,6 +71,10 @@ def remove_file(directory_list):
         directory_list.remove('.directory')
     return directory_list
 
+
+def resize_like(input_tensor, ref_tensor, scale): # resizes input tensor wrt. ref_tensor
+    H, W = ref_tensor.get_shape()[1], ref_tensor.get_shape()[2]
+    return tf.image.resize_nearest_neighbor(input_tensor, [H.value*scale, W.value*scale])
 
 def load_data():
     img1_list_t = []
@@ -184,15 +190,13 @@ def main():
 
             X_train = tf.concat([x1_t, x2_t], axis=3)
             Y_train = x3_t
-            print('Input shape TRAIN', K.input_shape(X_train))
-            print('OUT shape TRAIN', K.input_shape(Y_train))
+
 
             X_val = tf.concat([x1_v[0], x2_v[0]], axis=3)
             Y_val = x3_v[0]
-            print('Input shape VAL', K.input_shape(X_val))
-            print('OUT shape VAL', K.input_shape(Y_val))
+
             model.fit(x = X_train, y= Y_train, validation_data=(X_val, Y_val),
-                batch_size=256, verbose=2, epochs=epoch, callbacks=callbacks, shuffle=True, 
+                verbose=2, epochs=epoch, callbacks=callbacks, shuffle=True, 
                 steps_per_epoch=int(epoch/batch_size))
 
 if __name__ == '__main__':
