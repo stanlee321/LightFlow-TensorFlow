@@ -1,18 +1,12 @@
 import tensorflow as tf
-from tensorflow.keras import backend as K
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import SeparableConv2D, DepthwiseConv2D
-from tensorflow.keras.layers import Input
+from ..utils import  average_endpoint_error
 from tensorflow.keras.layers import Dense, Add, Activation, Dropout, Flatten, Conv2D, MaxPooling2D, LeakyReLU
 from tensorflow.keras.layers import BatchNormalization, Lambda
 from tensorflow.keras.layers import Concatenate, UpSampling2D 
-from tensorflow.image import resize_nearest_neighbor
-from tensorflow.keras import Model
-from keras.utils.vis_utils import plot_model
-from keras.engine.topology import get_source_inputs
 # Import Own Lib
 from .depthwise_conv2d import DepthwiseConvolution2D
-
+from ..net import Net, Mode
+from ..downsample import downsample
 
 def _depthwise_convolution2D(input, alpha, deepwise_filter_size, kernel_size, strides, padding='same', bias=False):
     x= DepthwiseConvolution2D(int(deepwise_filter_size * alpha), kernel_size, strides=strides, padding=padding, use_bias=bias)(input)
@@ -24,42 +18,32 @@ def _convolution2D(input, alpha, deepwise_filter_size, kernel_size, strides, pad
     x = Conv2D(int(deepwise_filter_size * alpha), kernel_size, strides=strides, padding=padding, use_bias=bias)(input)
     x = BatchNormalization()(x)
     x = LeakyReLU(alpha=0.1)(x)
-   
     return x
 
 def resize_like(input_tensor, ref_tensor, scale): # resizes input tensor wrt. ref_tensor
     H, W = ref_tensor.get_shape()[1], ref_tensor.get_shape()[2]
     return tf.image.resize_nearest_neighbor(input_tensor, [H.value*scale, W.value*scale])
 
-def average_endpoint_error(labels, predictions):
-    """
-    Given labels and predictions of size (N, H, W, 2), calculates average endpoint error:
-        sqrt[sum_across_channels{(X - Y)^2}]
-    """
-    num_samples = predictions.shape.as_list()[0]
-    with tf.name_scope(None, "average_endpoint_error", (predictions, labels)) as scope:
-        predictions = tf.to_float(predictions)
-        labels = tf.to_float(labels)
-        predictions.get_shape().assert_is_compatible_with(labels.get_shape())
 
-        squared_difference = tf.square(tf.subtract(predictions, labels))
-        # sum across channels: sum[(X - Y)^2] -> N, H, W, 1
-        loss = tf.reduce_sum(squared_difference, 3, keep_dims=True)
-        loss = tf.sqrt(loss)
-        return tf.reduce_sum(loss) / num_samples
+class LightFlow(Net):
 
+    def __init__(self, mode=Mode.TRAIN, debug=False):
+        super(LightFlow, self).__init__(mode=mode, debug=debug)
 
-class LightFlow:
-
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def build(input_tensor = None, input_shape=None, plot=False):
-       
-        input_image = Input(shape=input_shape)
-        concat_axis = 3
+    def model(self, inputs):
+        _concat_axis = 3
         alpha = 1.0
+
+        if 'warped' in inputs and 'flow' in inputs and 'brightness_error' in inputs:
+            stacked = True
+            concat_inputs = tf.concat([inputs['input_a'],
+                                        inputs['input_b'],
+                                        inputs['warped'],
+                                        inputs['flow'],
+                                        inputs['brightness_error']], axis=_concat_axis)
+        else:
+            concat_inputs = tf.concat([inputs['input_a'], inputs['input_b']], axis=_concat_axis)
+
 
         #################################################
         # ENCODER 
@@ -67,7 +51,7 @@ class LightFlow:
        
         # Conv1_dw / Conv1
 
-        conv1_dw = _depthwise_convolution2D(input_image, alpha, 6,  (3, 3), strides=(2, 2))
+        conv1_dw = _depthwise_convolution2D(inputs, alpha, 6,  (3, 3), strides=(2, 2))
         conv1 = _convolution2D(conv1_dw, alpha, 32, (1, 1), strides=(1, 1))
 
         # Conv2_dw / Conv2
@@ -112,28 +96,28 @@ class LightFlow:
 
         # Conv8_dw /Conv8
         conv7_resized_tensor = Lambda(resize_like, arguments={'ref_tensor':conv7, 'scale': 2})(conv7)
-        concat_op1 = Concatenate(axis=concat_axis)([conv7_resized_tensor, conv5b])
+        concat_op1 = Concatenate(axis=_concat_axis)([conv7_resized_tensor, conv5b])
         
         conv8_dw = _depthwise_convolution2D(concat_op1, alpha, 768,  (3, 3), strides=(1, 1))
         conv8 = _convolution2D(conv8_dw, alpha, 128, (1, 1), strides=(1, 1))
 
         # Conv9_dw /Conv9
         conv8_resized_tensor = Lambda(resize_like, arguments={'ref_tensor':conv8, 'scale': 2})(conv8)
-        concat_op2 = Concatenate(axis=concat_axis)([conv8_resized_tensor, conv4b])
+        concat_op2 = Concatenate(axis=_concat_axis)([conv8_resized_tensor, conv4b])
         
         conv9_dw = _depthwise_convolution2D(concat_op2, alpha, 384, (3,3), strides=(1,1))
         conv9 = _convolution2D(conv9_dw, alpha, 64, (1,1), strides=(1,1))
 
         # Conv10_dw / Conv10
         coonv9_resized_tensor = Lambda(resize_like, arguments={'ref_tensor':conv9, 'scale': 2})(conv9)
-        concat_op3 = Concatenate(axis=concat_axis)([coonv9_resized_tensor, conv3])
+        concat_op3 = Concatenate(axis=_concat_axis)([coonv9_resized_tensor, conv3])
 
         conv10_dw = _depthwise_convolution2D(concat_op3, alpha, 192, (3,3), strides=(1,1))
         conv10 = _convolution2D(conv10_dw, alpha, 32, (1,1), strides=(1,1))
 
         # Conv11_dw / Con11
         conv10_resized_tensor = Lambda(resize_like, arguments={'ref_tensor':conv10, 'scale': 2})(conv10)
-        concat_op3 = Concatenate(axis=concat_axis)([conv10_resized_tensor, conv2])
+        concat_op3 = Concatenate(axis=_concat_axis)([conv10_resized_tensor, conv2])
 
         conv11_dw = _depthwise_convolution2D(concat_op3, alpha, 96, (3,3), strides=(1,1))
         conv11 = _convolution2D(conv11_dw, alpha, 16, (1,1), strides=(1,1))
@@ -172,26 +156,44 @@ class LightFlow:
         conv13_resized_tensor_x8 = Lambda(resize_like, arguments={'ref_tensor':conv13, 'scale': 8})(conv13)
         conv14_resized_tensor_x4 = Lambda(resize_like, arguments={'ref_tensor':conv14, 'scale': 4})(conv14)
         conv15_resized_tensor_x2 = Lambda(resize_like, arguments={'ref_tensor':conv15, 'scale': 2})(conv15)
-
+        
+        # 96x128x2
         average = Add()([conv12_resized_tensor_x16, 
                                 conv13_resized_tensor_x8, 
                                 conv14_resized_tensor_x4 ,
                                 conv15_resized_tensor_x2, 
                                 conv16])
+        #average = tf.reduce_sum(tf.concatenate([conv12_resized_tensor_x16, 
+        #                        conv13_resized_tensor_x8, 
+        #                        conv14_resized_tensor_x4 ,
+        #                        conv15_resized_tensor_x2, 
+        #                        conv16]))
 
         # Fuse GT with prediction
-        average = Lambda(resize_like, arguments={'ref_tensor':average, 'scale': 4})(average)
-        # Ensure that the model takes into account
-        # any potential predecessors of `input_tensor`.
-        if input_tensor is not None:
-            input_image = get_source_inputs(input_tensor)
-        else:
-            pass
+        #output = Lambda(resize_like, arguments={'ref_tensor':average, 'scale': 4})(average)
+    
+        return {
+            'flow': average
+        }
 
-        # Create model for debug
-        model = Model(inputs=input_image, outputs=average, name='lightflow')
 
-        return model
+    def loss(self, flow, predictions):
+        flow = flow * 0.05
+
+        losses = []
+        INPUT_HEIGHT, INPUT_WIDTH = float(flow.shape[1].value), float(flow.shape[2].value)
+
+ 
+        # L2 loss between predict_flow2, blob43 (weighted w/ 0.005)
+        predicted_flow = predictions['flow']
+        size = [predicted_flow.shape[1], predicted_flow.shape[2]]
+        downsampled_flow2 = downsample(flow, size)
+        losses.append(average_endpoint_error(downsampled_flow2, predicted_flow))
+
+        loss = tf.losses.compute_weighted_loss(losses, [0.005])
+
+        # Return the 'total' loss: loss fns + regularization terms defined in the model
+        return tf.losses.get_total_loss()
 
 
 def main(plot = True):
@@ -199,6 +201,7 @@ def main(plot = True):
     model = LightFlow.build(input_shape=INPUT_SHAPE)
     if plot is True:
         plot_model(model, to_file='LightFLow.png', show_shapes=True)
+        #model_to_dot(model, show_shapes=True, show_layer_names=True, rankdir='TB').create(prog='dot', format='svg')
     print(model.summary())
 
 if __name__ == '__main__':
