@@ -12,7 +12,7 @@ from keras.utils.vis_utils import plot_model
 from keras.utils.vis_utils import model_to_dot
 from keras.engine.topology import get_source_inputs
 # Import Own Lib
-from depthwise_conv2d import DepthwiseConvolution2D
+from .depthwise_conv2d import DepthwiseConvolution2D
 from ..net import Net, Mode
 
 def _depthwise_convolution2D(input, alpha, deepwise_filter_size, kernel_size, strides, padding='same', bias=False):
