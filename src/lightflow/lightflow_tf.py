@@ -4,7 +4,7 @@ from tensorflow.keras.layers import Dense, Add, Activation, Dropout, Flatten, Co
 from tensorflow.keras.layers import BatchNormalization, Lambda
 from tensorflow.keras.layers import Concatenate, UpSampling2D 
 # Import Own Lib
-from .depthwise_conv2d import DepthwiseConvolution2D
+from ..depthwise_conv2d import DepthwiseConvolution2D
 from ..net import Net, Mode
 from ..downsample import downsample
 
