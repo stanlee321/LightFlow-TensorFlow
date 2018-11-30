@@ -101,7 +101,7 @@ class Net(object):
         tf.summary.scalar('loss', total_loss)
 
         if checkpoints:
-            for (checkpoint_path, (scope, new_scope)) in checkpoints.iteritems():
+            for (checkpoint_path, (scope, new_scope)) in checkpoints.items():
                 variables_to_restore = slim.get_variables(scope=scope)
                 renamed_variables = {
                     var.op.name.split(new_scope + '/')[1]: var
