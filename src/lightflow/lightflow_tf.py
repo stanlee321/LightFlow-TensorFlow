@@ -30,7 +30,7 @@ class LightFlow(Net):
     def __init__(self, mode=Mode.TRAIN, debug=False):
         super(LightFlow, self).__init__(mode=mode, debug=debug)
 
-    def model(self, inputs):
+    def model(self, inputs, training_schedule, trainable=True):
         _concat_axis = 3
         alpha = 1.0
 
