@@ -131,7 +131,7 @@ def config_to_arrays(dataset_config):
         del config['coeff_schedule_param']
 
     # Get all attributes
-    for (name, value) in config.iteritems():
+    for (name, value) in config.items():
         if name == 'coeff_schedule_param':
             output['coeff_schedule'] = [value['half_life'],
                                         value['initial_coeff'],
