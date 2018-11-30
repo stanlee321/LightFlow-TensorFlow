@@ -10,7 +10,7 @@ endif
 CC        = gcc -O2 -pthread
 CXX       = g++
 GPUCC     = nvcc --expt-relaxed-constexpr
-CFLAGS    = -std=c++11 -I$(TF_INC) -I"$(CUDA_HOME)/.." -DGOOGLE_CUDA=1
+CFLAGS    = -std=c++11 -I$(TF_INC) -I"$(CUDA_HOME)/.." #-DGOOGLE_CUDA=1
 GPUCFLAGS = -c 
 LFLAGS    = -pthread -shared -fPIC
 GPULFLAGS = -x cu -Xcompiler -fPIC
@@ -54,7 +54,7 @@ ifeq ($(detected_OS),Darwin)  # Mac OS X
 	CGPUFLAGS += -undefined dynamic_lookup
 endif
 ifeq ($(detected_OS),Linux)
-	CFLAGS += -D_MWAITXINTRIN_H_INCLUDED -D_FORCE_INLINES -D__STRICT_ANSI__ -D_GLIBCXX_USE_CXX11_ABI=0
+	CFLAGS += -D_MWAITXINTRIN_H_INCLUDED -D_FORCE_INLINES -D__STRICT_ANSI__ #-D_GLIBCXX_USE_CXX11_ABI=0
 endif
 
 all: preprocessing downsample correlation flowwarp
