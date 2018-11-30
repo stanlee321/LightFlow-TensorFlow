@@ -245,9 +245,11 @@ def load_batch(dataset_config, split_name, global_step):
         config_b = config_to_arrays(dataset_config['PREPROCESS']['image_b'])
 
         image_as, image_bs, flows = map(lambda x: tf.expand_dims(x, 0), [image_a, image_b, flow])
-
+        
+        
         # Perform data augmentation on GPU
         with tf.device('/cpu:0'):
+            """
             image_as, image_bs, transforms_from_a, transforms_from_b = \
                 _preprocessing_ops.data_augmentation(image_as,
                                                      image_bs,
@@ -267,7 +269,7 @@ def load_batch(dataset_config, split_name, global_step):
                                                      config_b['spread'],
                                                      config_b['prob'],
                                                      config_b['coeff_schedule'])
-
+            """
             noise_coeff_a = None
             noise_coeff_b = None
 
@@ -317,8 +319,8 @@ def load_batch(dataset_config, split_name, global_step):
                 image_bs = tf.clip_by_value(image_bs + noise_b, 0.0, 1.0)
 
                 # Perform flow augmentation using spatial parameters from data augmentation
-            flows = _preprocessing_ops.flow_augmentation(
-                flows, transforms_from_a, transforms_from_b, crop)
+            #flows = _preprocessing_ops.flow_augmentation(
+            #    flows, transforms_from_a, transforms_from_b, crop)
 
             return tf.train.batch([image_as, image_bs, flows],
                                   enqueue_many=True,
