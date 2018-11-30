@@ -1,7 +1,7 @@
 from ..dataloader import load_batch
 from ..dataset_configs import FLYING_CHAIRS_DATASET_CONFIG
 from ..training_schedules import LONG_SCHEDULE
-from .lightflow import LightFlow
+from .lightflow_tf import LightFlow
 
 # Create a new network
 net = LightFlow()
