@@ -3,19 +3,36 @@ from ..utils import  average_endpoint_error
 from tensorflow.keras.layers import Dense, Add, Activation, Dropout, Flatten, Conv2D, MaxPooling2D, LeakyReLU
 from tensorflow.keras.layers import BatchNormalization, Lambda
 from tensorflow.keras.layers import Concatenate, UpSampling2D 
+from tensorflow.keras import l2_regularizer
+
 # Import Own Lib
 from ..depthwise_conv2d import DepthwiseConvolution2D
 from ..net import Net, Mode
 from ..downsample import downsample
 
 def _depthwise_convolution2D(input, alpha, deepwise_filter_size, kernel_size, strides, padding='same', bias=False):
-    x= DepthwiseConvolution2D(int(deepwise_filter_size * alpha), kernel_size, strides=strides, padding=padding, use_bias=bias)(input)
+    x= DepthwiseConvolution2D(int(deepwise_filter_size * alpha), 
+                                kernel_size, 
+                                strides=strides,
+                                padding=padding, 
+                                use_bias=bias)(input)
     x= BatchNormalization()(x)
     x = LeakyReLU(alpha=0.1)(x)
     return  x
 
-def _convolution2D(input, alpha, deepwise_filter_size, kernel_size, strides, padding='same', bias=False):
-    x = Conv2D(int(deepwise_filter_size * alpha), kernel_size, strides=strides, padding=padding, use_bias=bias)(input)
+def _convolution2D(input, alpha,
+                    deepwise_filter_size,
+                    kernel_size, 
+                    strides, 
+                    padding='same', 
+                    bias=False, 
+                    kernel_reg=False):
+    x = Conv2D(int(deepwise_filter_size * alpha), 
+                kernel_size, 
+                strides=strides,
+                padding=padding,
+                use_bias=bias,
+                kernel_regularizer=l2_regularizer(kernel_reg))(input)
     x = BatchNormalization()(x)
     x = LeakyReLU(alpha=0.1)(x)
     return x
@@ -44,6 +61,7 @@ class LightFlow(Net):
         else:
             concat_inputs = tf.concat([inputs['input_a'], inputs['input_b']], axis=_concat_axis)
 
+        weight_decay = l2_regularizer(training_schedule['weight_decay'])
 
         #################################################
         # ENCODER 
@@ -52,11 +70,11 @@ class LightFlow(Net):
         # Conv1_dw / Conv1
 
         conv1_dw = _depthwise_convolution2D(concat_inputs, alpha, 6,  (3, 3), strides=(2, 2))
-        conv1 = _convolution2D(conv1_dw, alpha, 32, (1, 1), strides=(1, 1))
+        conv1 = _convolution2D(conv1_dw, alpha, 32, (1, 1), strides=(1, 1), kernel_reg=weight_decay)
 
         # Conv2_dw / Conv2
-        conv2_dw = _depthwise_convolution2D(conv1, alpha, 32,  (3, 3), strides=(2, 2))
-        conv2 = _convolution2D(conv2_dw, alpha, 64, (1, 1), strides=(1, 1) )
+        conv2_dw = _depthwise_convolution2D(conv1, alpha, 32, (3, 3), strides=(2, 2))
+        conv2 = _convolution2D(conv2_dw, alpha, 64, (1, 1), strides=(1, 1), kernel_reg=weight_decay)
         
         # Conv3_dw / Conv3
         conv3_dw = _depthwise_convolution2D(conv2, alpha, 64,  (3, 3), strides=(2, 2))
@@ -189,20 +207,8 @@ class LightFlow(Net):
         size = [predicted_flow.shape[1], predicted_flow.shape[2]]
         downsampled_flow2 = downsample(flow, size)
         losses.append(average_endpoint_error(downsampled_flow2, predicted_flow))
-
-        loss = tf.losses.compute_weighted_loss(losses, [0.005])
+        
+        loss = tf.losses.compute_weighted_loss(losses, [0.32, 0.08, 0.02, 0.01, 0.005])
 
         # Return the 'total' loss: loss fns + regularization terms defined in the model
         return tf.losses.get_total_loss()
-
-
-def main(plot = True):
-    INPUT_SHAPE = (384, 512,6)
-    model = LightFlow.build(input_shape=INPUT_SHAPE)
-    if plot is True:
-        plot_model(model, to_file='LightFLow.png', show_shapes=True)
-        #model_to_dot(model, show_shapes=True, show_layer_names=True, rankdir='TB').create(prog='dot', format='svg')
-    print(model.summary())
-
-if __name__ == '__main__':
-    main()
