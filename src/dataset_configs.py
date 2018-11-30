@@ -42,9 +42,9 @@ FLYING_CHAIRS_DATASET_CONFIG = {
     'SIZES': {
         'train': 22232,
         'validate': 640,
-        'sample': 4,
+        'sample': 8,
     },
-    'BATCH_SIZE': 4,
+    'BATCH_SIZE': 8,
     'PATHS': {
         'train': './data/tfrecords/fc_train.tfrecords',
         'validate': './data/tfrecords/fc_val.tfrecords',
