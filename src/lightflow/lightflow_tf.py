@@ -51,7 +51,7 @@ class LightFlow(Net):
        
         # Conv1_dw / Conv1
 
-        conv1_dw = _depthwise_convolution2D(inputs, alpha, 6,  (3, 3), strides=(2, 2))
+        conv1_dw = _depthwise_convolution2D(concat_inputs, alpha, 6,  (3, 3), strides=(2, 2))
         conv1 = _convolution2D(conv1_dw, alpha, 32, (1, 1), strides=(1, 1))
 
         # Conv2_dw / Conv2
