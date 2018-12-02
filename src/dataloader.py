@@ -249,6 +249,8 @@ def load_batch(dataset_config, split_name, global_step):
         
         # Perform data augmentation on GPU
         with tf.device('/cpu:0'):
+
+            # TODO FIX Data augmentation
             """
             image_as, image_bs, transforms_from_a, transforms_from_b = \
                 _preprocessing_ops.data_augmentation(image_as,
@@ -319,6 +321,8 @@ def load_batch(dataset_config, split_name, global_step):
                 image_bs = tf.clip_by_value(image_bs + noise_b, 0.0, 1.0)
 
                 # Perform flow augmentation using spatial parameters from data augmentation
+            
+            # TODO uncomment this line if data augmentation was fixed
             #flows = _preprocessing_ops.flow_augmentation(
             #    flows, transforms_from_a, transforms_from_b, crop)
 
