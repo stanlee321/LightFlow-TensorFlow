@@ -3,7 +3,6 @@ from ..utils import  average_endpoint_error
 from tensorflow.keras.layers import Dense, Add, Activation, Dropout, Flatten, Conv2D, MaxPooling2D, LeakyReLU
 from tensorflow.keras.layers import BatchNormalization, Lambda
 from tensorflow.keras.layers import Concatenate, UpSampling2D 
-from tensorflow.keras import l2_regularizer
 
 # Import Own Lib
 from ..depthwise_conv2d import DepthwiseConvolution2D
@@ -177,7 +176,7 @@ class LightFlow(Net):
         #                        conv14_resized_tensor_x4 ,
         #                        conv15_resized_tensor_x2, 
         #                       conv16])
-        
+
         average = tf.reduce_mean([conv12_resized_tensor_x16, 
                                 conv13_resized_tensor_x8, 
                                 conv14_resized_tensor_x4,
