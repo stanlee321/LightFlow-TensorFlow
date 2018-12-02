@@ -1,7 +1,7 @@
 import tensorflow as tf
 from ..utils import  average_endpoint_error
 from tensorflow.keras.layers import Dense, Add, Activation, Dropout, Flatten, Conv2D, MaxPooling2D, LeakyReLU
-from tensorflow.keras.layers import BatchNormalization, Lambda
+from tensorflow.keras.layers import BatchNormalization, Lambda, Average
 from tensorflow.keras.layers import Concatenate, UpSampling2D 
 
 # Import Own Lib
@@ -177,7 +177,7 @@ class LightFlow(Net):
         #                        conv15_resized_tensor_x2, 
         #                       conv16])
 
-        average = tf.keras.layers.Average([conv12_resized_tensor_x16, 
+        average = Average()([conv12_resized_tensor_x16, 
                                 conv13_resized_tensor_x8, 
                                 conv14_resized_tensor_x4,
                                 conv15_resized_tensor_x2, 
