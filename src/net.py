@@ -110,8 +110,7 @@ class Net(object):
             for (checkpoint_path, (scope, new_scope)) in checkpoints.items():
                 variables_to_restore = slim.get_variables(scope=scope)
                 renamed_variables = {
-                    var.op.name.split(new_scope + '/')[1]: var
-                    for var in variables_to_restore
+                    var.op.name.split(new_scope + '/')[1]: var for var in variables_to_restore
                 }
                 restorer = tf.train.Saver(renamed_variables)
                 with tf.Session() as sess:

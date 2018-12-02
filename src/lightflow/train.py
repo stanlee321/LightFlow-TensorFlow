@@ -22,6 +22,6 @@ net.train(
         #'./checkpoints/FlowNetSD/flownet-SD.ckpt-0': ('FlowNet2/FlowNetSD', 'FlowNet2')
     #}
     checkpoints = {
-        '../../logs/lightflow/model.ckpt-9468': ('LightFlow/LightFlow', 'LightFlow')
+        '../../logs/lightflow/model.ckpt-9468': ('lightflow/lightflow', 'lightflow')
     }
 )
