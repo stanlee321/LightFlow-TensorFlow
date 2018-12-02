@@ -106,15 +106,22 @@ class Net(object):
         total_loss = self.loss(flow, predictions)
         tf.summary.scalar('loss', total_loss)
 
+        checkpoint_dir = '../logs/lightflow/'
+        """
         if checkpoints:
             for (checkpoint_path, (scope, new_scope)) in checkpoints.items():
                 variables_to_restore = slim.get_variables(scope=scope)
                 renamed_variables = {
-                    var.op.name.split(new_scope + '/')[1]: var for var in variables_to_restore
+                    var.op.name.split(new_scope + '/')[1]: var  for var in variables_to_restore
                 }
                 restorer = tf.train.Saver(renamed_variables)
                 with tf.Session() as sess:
                     restorer.restore(sess, checkpoint_path)
+        """
+        if checkpoints == 'latest':
+            tf.train.latest_checkpoint(
+            checkpoint_dir,
+            latest_filename='model.ckpt-9468')
 
         # Show the generated flow in TensorBoard
         if 'flow' in predictions:
