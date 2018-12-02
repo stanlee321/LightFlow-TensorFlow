@@ -1,10 +1,10 @@
 LONG_SCHEDULE = {
-    'step_values': [400000, 600000, 800000, 1000000],
-    'learning_rates': [0.0001, 0.00005, 0.000025, 0.0000125, 0.00000625],
+    'step_values': [10000, 20000, 10000, 10000, 10000],
+    'learning_rates': [0.001, 0.01, 0.01/2, (0.01/2)/2, (((0.01/2)/2)/2)],
     'momentum': 0.9,
     'momentum2': 0.999,
-    'weight_decay': 0.0004,
-    'max_iter': 1200000,
+    'weight_decay': 0.00004,
+    'max_iter': 75000,
 }
 
 FINETUNE_SCHEDULE = {

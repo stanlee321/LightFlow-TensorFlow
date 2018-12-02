@@ -88,8 +88,12 @@ class Net(object):
             self.global_step,
             [tf.cast(v, tf.int64) for v in training_schedule['step_values']],
             training_schedule['learning_rates'])
+        
 
-        optimizer = tf.train.AdamOptimizer(
+        #optimizer = tf.train.AdamOptimizer(
+        weight_decay_val = training_schedule['weight_decay']
+        optimizer = tf.contrib.opt.AdamWOptimizer(
+            weight_decay_val,
             self.learning_rate,
             training_schedule['momentum'],
             training_schedule['momentum2'])
