@@ -7,7 +7,8 @@ ifndef CUDA_HOME
     CUDA_HOME := /usr/local/cuda-9.0
 endif
 
-CC        = gcc -O2 -pthread
+#CC        = gcc -O2 -pthread
+CC		  = gcc-4.8 -O2 -pthread CXX = g++-4.8
 CXX       = g++
 GPUCC     = nvcc --expt-relaxed-constexpr
 CFLAGS    = -std=c++11 -I$(TF_INC) -I"$(CUDA_HOME)/.." -DGOOGLE_CUDA=1 -DNDEBUG
