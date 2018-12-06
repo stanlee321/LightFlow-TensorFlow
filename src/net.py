@@ -49,14 +49,14 @@ class Net(object):
         input_b = imread(input_b_path)
 
         # Convert from RGB -> BGR
-        #input_a = input_a[..., [2, 1, 0]]
-        #input_b = input_b[..., [2, 1, 0]]
+        input_a = input_a[..., [2, 1, 0]]
+        input_b = input_b[..., [2, 1, 0]]
 
         # Scale from [0, 255] -> [0.0, 1.0] if needed
-        #if input_a.max() > 1.0:
-        #    input_a = input_a / 255.0
-        #if input_b.max() > 1.0:
-        #    input_b = input_b / 255.0
+        if input_a.max() > 1.0:
+            input_a = input_a / 255.0
+        if input_b.max() > 1.0:
+            input_b = input_b / 255.0
             
         # TODO: This is a hack, we should get rid of this
         training_schedule = LONG_SCHEDULE

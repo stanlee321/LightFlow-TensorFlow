@@ -16,7 +16,7 @@ def main_test():
 
     # Train on the data
     net.test(
-        checkpoint='./checkpoints/lightflow/model.ckpt-75000', #"./checkpoints_old/lightflow/model.ckpt-9468"
+        checkpoint='./checkpoints/model_120k/model.ckpt-122121', #"./checkpoints_old/lightflow/model.ckpt-9468"
         input_a_path=FLAGS.input_a,
         input_b_path=FLAGS.input_b,
         out_path=FLAGS.out,
