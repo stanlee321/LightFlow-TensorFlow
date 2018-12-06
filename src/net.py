@@ -205,7 +205,7 @@ class Net(object):
         }
         graph = tf.Graph()
         with graph.as_default():
-            predictions = self.model(inputs, training_schedule, trainable=False)
+            predictions = self.model(inputs, training_schedule, trainable=False, build=True)
             pred_flow = predictions['flow']
             input_tensor = predictions['inputs']
             saver = tf.train.Saver(tf.global_variables())
