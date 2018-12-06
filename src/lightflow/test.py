@@ -28,7 +28,7 @@ def main_build():
 
     # Train on the data
     net.test_ckpt(
-        checkpoint='./checkpoints/lightflow/model.ckpt-75000',
+        checkpoint='./logs/lightflow/model.ckpt-55000',
         input_a_path=FLAGS.input_a,
         input_b_path=FLAGS.input_b,
         output_path='./checkpoints/model')
@@ -71,4 +71,4 @@ if __name__ == '__main__':
         raise ValueError('image_b path must exist')
     if not os.path.isdir(FLAGS.out):
         raise ValueError('out directory must exist')
-    main_test()
+    main_build()

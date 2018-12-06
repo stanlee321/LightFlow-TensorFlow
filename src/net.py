@@ -222,6 +222,7 @@ class Net(object):
             saver.restore(sess, checkpoint)
             #############################
             # FIX BATCH NORM?
+            """
             gd = sess.graph.as_graph_def()
             for node in gd.node:            
                 if node.op == 'RefSwitch':
@@ -241,6 +242,7 @@ class Net(object):
                         if 'moving_' in node.input[index]:
                             node.input[index] = node.input[index] + '/read'
             output_node_names = 'average/truediv'
+            """
             ############################
             saver.save(sess, output_path + '/deployfinal.ckpt')
 
