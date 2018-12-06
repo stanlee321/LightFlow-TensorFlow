@@ -1,10 +1,12 @@
+#import sys
+#import os
 import tensorflow as tf
 from tensorflow.keras import backend as K
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import SeparableConv2D, DepthwiseConv2D
 from tensorflow.keras.layers import Input
 from tensorflow.keras.layers import Dense, Add, Activation, Dropout, Flatten, Conv2D, MaxPooling2D, LeakyReLU
-from tensorflow.keras.layers import BatchNormalization, Lambda
+from tensorflow.keras.layers import BatchNormalization, Lambda, Average
 from tensorflow.keras.layers import Concatenate, UpSampling2D 
 from tensorflow.image import resize_nearest_neighbor
 from tensorflow.keras import Model
@@ -12,8 +14,8 @@ from keras.utils.vis_utils import plot_model
 from keras.utils.vis_utils import model_to_dot
 from keras.engine.topology import get_source_inputs
 # Import Own Lib
-from .depthwise_conv2d import DepthwiseConvolution2D
-from ..net import Net, Mode
+#sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+from depthwise_conv2d import DepthwiseConvolution2D
 
 def _depthwise_convolution2D(input, alpha, deepwise_filter_size, kernel_size, strides, padding='same', bias=False):
     x= DepthwiseConvolution2D(int(deepwise_filter_size * alpha), kernel_size, strides=strides, padding=padding, use_bias=bias)(input)
@@ -158,9 +160,9 @@ class LightFlow():
         conv15_resized_tensor_x2 = Lambda(resize_like, arguments={'ref_tensor':conv15, 'scale': 2})(conv15)
         
         # 96x128x2
-        average = Add()([conv12_resized_tensor_x16, 
+        average = Average()([conv12_resized_tensor_x16, 
                                 conv13_resized_tensor_x8, 
-                                conv14_resized_tensor_x4 ,
+                                conv14_resized_tensor_x4,
                                 conv15_resized_tensor_x2, 
                                 conv16])
 

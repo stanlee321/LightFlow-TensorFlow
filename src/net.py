@@ -1,12 +1,17 @@
 import abc
 from enum import Enum
 import os
+import time
 import tensorflow as tf
+from tensorflow.keras import backend as K
 from .flowlib import flow_to_image, write_flow
+import numpy as np
+import cv2
 import numpy as np
 from scipy.misc import imread, imsave
 import uuid
 from .training_schedules import LONG_SCHEDULE
+
 slim = tf.contrib.slim
 
 
@@ -53,7 +58,7 @@ class Net(object):
             input_a = input_a / 255.0
         if input_b.max() > 1.0:
             input_b = input_b / 255.0
-
+            
         # TODO: This is a hack, we should get rid of this
         training_schedule = LONG_SCHEDULE
 
@@ -61,15 +66,15 @@ class Net(object):
             'input_a': tf.expand_dims(tf.constant(input_a, dtype=tf.float32), 0),
             'input_b': tf.expand_dims(tf.constant(input_b, dtype=tf.float32), 0),
         }
-        predictions = self.model(inputs, training_schedule)
+        predictions = self.model(inputs, training_schedule, trainable=False)
         pred_flow = predictions['flow']
-
+        
         saver = tf.train.Saver()
 
         with tf.Session() as sess:
             saver.restore(sess, checkpoint)
             pred_flow = sess.run(pred_flow)[0, :, :, :]
-
+            
             unique_name = 'flow-' + str(uuid.uuid4())
             if save_image:
                 flow_img = flow_to_image(pred_flow)
@@ -79,6 +84,168 @@ class Net(object):
             if save_flo:
                 full_out_path = os.path.join(out_path, unique_name + '.flo')
                 write_flow(pred_flow, full_out_path)
+    @staticmethod
+    def load_graph(frozen_graph_filename):
+        # read graph definition
+        # We load the protobuf file from the disk and parse it to retrieve the 
+        # unserialized graph_def
+        with tf.gfile.GFile(frozen_graph_filename, "rb") as f:
+            graph_def = tf.GraphDef()
+            graph_def.ParseFromString(f.read())
+        # Then, we import the graph_def into a new Graph and returns it 
+        with tf.Graph().as_default() as graph:
+
+            # The name var will prefix every op/nodes in your graph
+            # Since we load everything in a new graph, this is not needed
+            tf.import_graph_def(graph_def, name="")
+            # print operations
+
+        return graph
+
+    def test_cam(self, checkpoint):
+        height =  384
+        width = 512
+        cap = cv2.VideoCapture(0)
+        #cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+        #cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+        # if video file successfully open then read an initial frame from video
+        for i in range(5):
+            ret, input_a = cap.read()
+        loaded = False
+        input_a = cv2.cvtColor(input_a, cv2.COLOR_RGB2BGR)
+
+        graph = Net.load_graph(checkpoint)
+        # We can verify that we can access the list of operations in the graph
+        #for op in graph.get_operations():
+        #    print(op.name)
+
+        # We access the input and output nodes 
+        x = graph.get_tensor_by_name("input_1:0")
+        y = graph.get_tensor_by_name("average/truediv:0")
+        with tf.Session(graph=graph) as sess:
+            while True:
+
+                # if video file successfully open then read frame from video
+
+                ret, input_b = cap.read()
+
+                # convert image to grayscale
+
+                input_b = cv2.cvtColor(input_b, cv2.COLOR_RGB2BGR)
+
+                training_schedule = LONG_SCHEDULE
+                input_a = cv2.resize(input_a, (width, height))
+                input_b = cv2.resize(input_b, (width, height))
+
+                inputs = {
+                    'input_a': tf.expand_dims(tf.constant(input_a, dtype=tf.float32), 0),
+                    'input_b': tf.expand_dims(tf.constant(input_b, dtype=tf.float32), 0),
+                }
+                concat_inputs = np.concatenate([input_a, input_b], axis=2)
+                concat_inputs = np.expand_dims(concat_inputs, axis=0)
+                #print(concat_inputs.shape)
+
+                #print(inputs['input_a'].get_shape())
+                #print(inputs['input_a'].get_shape())
+
+                #predictions = self.model(inputs, training_schedule)
+                # Calculate the flow
+                t1 = time.time()
+                predictions = sess.run(y, feed_dict={x:concat_inputs})[0, :, :, :]
+                print("elapsedtime =", time.time() - t1)
+                #pred_flow = predictions['flow']
+        
+                #pred_flow = sess.run(pred_flow)[0, :, :, :]
+                flow_img = flow_to_image(predictions)
+        
+                input_a = input_b
+
+                # display image with optic flow overlay
+
+                cv2.imshow('flow', cv2.resize(flow_img, (320,240)))
+
+                key = cv2.waitKey(40) & 0xFF; # wait 40ms (i.e. 1000ms / 25 fps = 40 ms)
+
+                # It can also be set to detect specific key strokes by recording which key is pressed
+
+                # e.g. if user presses "x" then exit  / press "f" for fullscreen display
+
+                if (key == ord('x')):
+                    break
+            # close all windows
+            cv2.destroyAllWindows()
+
+    def test_ckpt(self, checkpoint, input_a_path, input_b_path, output_path):
+        """
+        use as:
+        python -m  src.lightflow.test \
+        --input_a data/samples/0img0.ppm  \
+        --input_b data/samples/0img1.ppm --out ./
+        """
+        input_a = imread(input_a_path)
+        input_b = imread(input_b_path)
+
+        # Convert from RGB -> BGR
+        input_a = input_a[..., [2, 1, 0]]
+        input_b = input_b[..., [2, 1, 0]]
+
+        # Scale from [0, 255] -> [0.0, 1.0] if needed
+        if input_a.max() > 1.0:
+            input_a = input_a / 255.0
+        if input_b.max() > 1.0:
+            input_b = input_b / 255.0
+
+        # TODO: This is a hack, we should get rid of this
+        training_schedule = LONG_SCHEDULE
+        # TODO: Remove this inputs since this are not used for this task of filter the 
+        # Graph 
+        inputs = {
+            'input_a': tf.expand_dims(tf.constant(input_a, dtype=tf.float32), 0),
+            'input_b': tf.expand_dims(tf.constant(input_b, dtype=tf.float32), 0),
+        }
+        graph = tf.Graph()
+        with graph.as_default():
+            predictions = self.model(inputs, training_schedule, trainable=False)
+            pred_flow = predictions['flow']
+            input_tensor = predictions['inputs']
+            saver = tf.train.Saver(tf.global_variables())
+            sess  = tf.Session()
+            sess.run(tf.global_variables_initializer())
+            sess.run(tf.local_variables_initializer())
+
+
+            op = sess.graph.get_operations()
+
+            print("in=", input_tensor.name)
+            print("on=", pred_flow.name)
+
+            saver.restore(sess, checkpoint)
+            #############################
+            # FIX BATCH NORM?
+            gd = sess.graph.as_graph_def()
+            for node in gd.node:            
+                if node.op == 'RefSwitch':
+                    node.op = 'Switch'
+                    for index in range(len(node.input)):
+                        if 'moving_' in node.input[index]:
+                            node.input[index] = node.input[index] + '/read'
+                elif node.op == 'AssignSub':
+                    node.op = 'Sub'
+                    if 'use_locking' in node.attr: del node.attr['use_locking']
+                elif node.op == 'AssignAdd':
+                    node.op = 'Add'
+                    if 'use_locking' in node.attr: del node.attr['use_locking']
+                elif node.op == 'ReadVariableOp':
+                    node.op = 'Switch'
+                    for index in range(len(node.input)):
+                        if 'moving_' in node.input[index]:
+                            node.input[index] = node.input[index] + '/read'
+            output_node_names = 'average/truediv'
+            ############################
+            saver.save(sess, output_path + '/deployfinal.ckpt')
+
+            graphdef = graph.as_graph_def()
+            tf.train.write_graph(graphdef, output_path, 'lightflow.pbtxt', as_text=True)
 
     def train(self, log_dir, training_schedule, input_a, input_b, flow, checkpoints=None):
         tf.summary.image("image_a", input_a, max_outputs=2)
@@ -107,21 +274,17 @@ class Net(object):
         tf.summary.scalar('loss', total_loss)
 
         checkpoint_dir = '../logs/lightflow/'
-        """
-        if checkpoints:
-            for (checkpoint_path, (scope, new_scope)) in checkpoints.items():
-                variables_to_restore = slim.get_variables(scope=scope)
-                renamed_variables = {
-                    var.op.name.split(new_scope + '/')[1]: var  for var in variables_to_restore
-                }
-                restorer = tf.train.Saver(renamed_variables)
-                with tf.Session() as sess:
-                    restorer.restore(sess, checkpoint_path)
-        """
+
         if checkpoints == 'latest':
+            restorer = tf.train.Saver(max_to_keep=100)
+            with tf.Session() as sess:
+                restorer.restore(sess, checkpoint_dir)
+            """
             tf.train.latest_checkpoint(
             checkpoint_dir,
-            latest_filename='model.ckpt-9468')
+            latest_filename=None)
+            """
+
 
         # Show the generated flow in TensorBoard
         if 'flow' in predictions:
@@ -136,7 +299,7 @@ class Net(object):
         true_flow_0 = tf.py_func(flow_to_image, [true_flow_0], tf.uint8)
         true_flow_1 = flow[1, :, :, :]
         true_flow_1 = tf.py_func(flow_to_image, [true_flow_1], tf.uint8)
-        true_flow_img = tf.stack([true_flow_0, true_flow_1], 0)
+        true_flow_img = tf.stasack([true_flow_0, true_flow_1], 0)
         tf.summary.image('true_flow', true_flow_img, max_outputs=2)
 
         train_op = slim.learning.create_train_op(

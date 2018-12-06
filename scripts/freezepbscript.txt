@@ -1,0 +1,33 @@
+python scripts/freeze_graph.py \
+--input_graph=checkpoints/model/lightflow.pbtxt \
+--input_checkpoint=checkpoints/model/deployfinal.ckpt \
+--output_graph=checkpoints/model/lightflow_frozen_person.pb \
+--output_node_names="average/truediv" 
+
+##### THIS WORKS
+python scripts/freeze_graph.py \
+--model_dir=checkpoints/model/ 
+#####
+
+
+"input_1:0"
+"average/truediv:0"
+
+# Optimize for inference
+python -m scripts.optimize_for_inference_lib  \
+--input checkpoints/model/lightflow_fixed.pb \
+--output checkpoints/model/lightflow_fixed_optimized.pb \
+--input_names=input_1 \
+--output_names=average/truediv
+
+
+# Import pb to tensorboard
+python tensorflow/python/tools/import_pb_to_tensorboard.py \
+--model_dir build/lightflow_frozen_model_facenet.pb \
+--log_dir build/logs/tensorboard
+
+
+# TEST SCRIPT
+# python -m  src.lightflow.test \
+--input_a data/samples/0img0.ppm  \
+--input_b data/samples/0img1.ppm --out ./
