@@ -179,20 +179,19 @@ class Net(object):
         total_loss = self.loss(flow, predictions)
         tf.summary.scalar('loss', total_loss)
 
-        checkpoint_dir = './logs/lightflow/model.ckpt-9468'
+        #checkpoint_dir = './logs/lightflow/model.ckpt-9468'
         checkpoint_dir = './logs/lightflow/model.ckpt-75000'
 
 
         if checkpoints == 'latest':
-            print('restoring...')
-            restorer = tf.train.Saver(max_to_keep=100)
-            with tf.Session() as sess:
-                restorer.restore(sess, checkpoint_dir)
-            """
+            print('[INFO]>>>>>>> restoring...')
+            print(checkpoint_dir)
+            #restorer = tf.train.Saver(max_to_keep=100)
+            #with tf.Session() as sess:
+            #    restorer.restore(sess, checkpoint_dir)
             tf.train.latest_checkpoint(
             checkpoint_dir,
             latest_filename=None)
-            """
 
 
         # Show the generated flow in TensorBoard
