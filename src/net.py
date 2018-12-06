@@ -299,7 +299,7 @@ class Net(object):
         true_flow_0 = tf.py_func(flow_to_image, [true_flow_0], tf.uint8)
         true_flow_1 = flow[1, :, :, :]
         true_flow_1 = tf.py_func(flow_to_image, [true_flow_1], tf.uint8)
-        true_flow_img = tf.stasack([true_flow_0, true_flow_1], 0)
+        true_flow_img = tf.stack([true_flow_0, true_flow_1], 0)
         tf.summary.image('true_flow', true_flow_img, max_outputs=2)
 
         train_op = slim.learning.create_train_op(
