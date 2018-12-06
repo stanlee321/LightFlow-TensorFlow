@@ -180,8 +180,8 @@ class Net(object):
         tf.summary.scalar('loss', total_loss)
 
         #checkpoint_dir = './logs/lightflow/model.ckpt-9468'
-        checkpoint_dir = './logs/lightflow/model.ckpt-75000'
-        checkpoin_dir = './logs/lightflow/'
+        #checkpoint_dir = './logs/lightflow/model.ckpt-75000'
+        checkpoint_dir = './logs/lightflow/'
 
         if checkpoints == 'latest':
             print('[INFO]>>>>>>> restoring...')
