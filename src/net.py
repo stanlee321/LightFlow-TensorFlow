@@ -273,7 +273,7 @@ class Net(object):
         total_loss = self.loss(flow, predictions)
         tf.summary.scalar('loss', total_loss)
 
-        checkpoint_dir = '../logs/lightflow/model.ckpt-9468'
+        checkpoint_dir = './logs/lightflow/model.ckpt-9468'
 
         if checkpoints == 'latest':
             print('restoring...')
