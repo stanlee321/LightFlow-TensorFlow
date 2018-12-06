@@ -6,7 +6,7 @@ import tensorflow as tf
 from tensorflow.keras import backend as K
 from .flowlib import flow_to_image, write_flow
 import numpy as np
-import cv2
+#import cv2
 import numpy as np
 from scipy.misc import imread, imsave
 import uuid
