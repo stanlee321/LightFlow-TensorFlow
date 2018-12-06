@@ -8,7 +8,7 @@ from tensorflow.keras import backend as K
 # Import Own Lib
 from ..depthwise_conv2d import DepthwiseConvolution2D
 from ..net import Net, Mode
-#from ..downsample import downsample
+from ..downsample import downsample
 
 def _depthwise_convolution2D(input, _alpha, deepwise_filter_size, kernel_size, strides, padding='same', bias=False, training=True):
     x= DepthwiseConvolution2D(int(deepwise_filter_size * _alpha), 
