@@ -191,6 +191,7 @@ class LightFlow(Net):
         flow = Lambda(resize_like, arguments={'ref_tensor':average, 'scale': 4})(average)
     
         return {
+            'inputs': concat_inputs,
             'flow': flow
         }
 
