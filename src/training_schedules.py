@@ -4,7 +4,7 @@ LONG_SCHEDULE = {
     'momentum': 0.9,
     'momentum2': 0.999,
     'weight_decay': 0.00004,
-    'max_iter': 75000,
+    'max_iter': 55000,
 }
 
 FINETUNE_SCHEDULE = {
