@@ -5,8 +5,8 @@ dir(tf.contrib.resampler)
 # The original freeze_graph function
 # from tensorflow.python.tools.freeze_graph import freeze_graph 
 dir = os.path.dirname(os.path.realpath(__file__))
-tf.load_op_library(
-    tf.resource_loader.get_path_to_datafile("./src/ops/build/downsample.so"))
+#tf.load_op_library(
+#    tf.resource_loader.get_path_to_datafile("./src/ops/build/downsample.so"))
 def freeze_graph(model_dir, output_node_names):
     """Extract the sub graph defined by the output nodes and convert 
     all its variables into constant 
@@ -60,7 +60,7 @@ def freeze_graph(model_dir, output_node_names):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_dir", type=str, default="", help="Model folder to export")
-    parser.add_argument("--output_node_names", type=str, default="average/truediv", help="The name of the output nodes, comma separated.")
+    parser.add_argument("--output_node_names", type=str, default="lambda_8/ResizeNearestNeighbor", help="The name of the output nodes, comma separated.")
     args = parser.parse_args()
 
     freeze_graph(args.model_dir, args.output_node_names)

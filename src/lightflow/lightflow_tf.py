@@ -8,7 +8,7 @@ from tensorflow.keras import backend as K
 # Import Own Lib
 from ..depthwise_conv2d import DepthwiseConvolution2D
 from ..net import Net, Mode
-from ..downsample import downsample
+#from ..downsample import downsample
 
 def _depthwise_convolution2D(input, _alpha, deepwise_filter_size, kernel_size, strides, padding='same', bias=False, training=True):
     x= DepthwiseConvolution2D(int(deepwise_filter_size * _alpha), 
@@ -60,8 +60,8 @@ class LightFlow(Net):
             concat_inputs = tf.concat([inputs['input_a'], inputs['input_b']], axis=_concat_axis)
         
         if build is True:
-            INPUT_SHAPE = (384, 512,6)
-            concat_inputs =  Input(shape=INPUT_SHAPE)
+            #INPUT_SHAPE = #(384, 512,6)
+            concat_inputs =  tf.concat([inputs['input_a'], inputs['input_b']], axis=_concat_axis) #Input(shape=INPUT_SHAPE)
         
         #################################################
         # ENCODER 
@@ -177,7 +177,7 @@ class LightFlow(Net):
         conv15_resized_tensor_x2 = Lambda(resize_like, arguments={'ref_tensor':conv15, 'scale': 2})(conv15)
         
         # 96x128x2
-        average = Average(name='average_layer')([conv12_resized_tensor_x16, 
+        flow = Average(name='average_layer')([conv12_resized_tensor_x16, 
                             conv13_resized_tensor_x8, 
                             conv14_resized_tensor_x4,
                             conv15_resized_tensor_x2, 
@@ -188,7 +188,7 @@ class LightFlow(Net):
         #                align_corners=True)
         
         # Fuse groundtrunth resolution with prediction
-        flow = Lambda(resize_like, arguments={'ref_tensor':average, 'scale': 4})(average)
+        #flow = Lambda(resize_like, arguments={'ref_tensor':average, 'scale': 4})(average)
     
         return {
             'inputs': concat_inputs,

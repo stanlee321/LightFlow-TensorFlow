@@ -4,14 +4,26 @@ python scripts/freeze_graph.py \
 --output_graph=checkpoints/model/lightflow_frozen_person.pb \
 --output_node_names="average/truediv" 
 
+
+1.- 
+# TEST SCRIPT
+# python -m  src.lightflow.test \
+--input_a data/samples/0img0.ppm  \
+--input_b data/samples/0img1.ppm --out ./
+
+2.-
 ##### THIS WORKS
 python scripts/freeze_graph.py \
---model_dir=checkpoints/model/ 
+--model_dir=checkpoints/model_55k/ 
 #####
 
 
 "input_1:0"
 "average/truediv:0"
+
+in= input_1:0
+on= lambda_8/ResizeNearestNeighbor:0
+
 
 # Optimize for inference
 python -m scripts.optimize_for_inference_lib  \
@@ -27,7 +39,3 @@ python tensorflow/python/tools/import_pb_to_tensorboard.py \
 --log_dir build/logs/tensorboard
 
 
-# TEST SCRIPT
-# python -m  src.lightflow.test \
---input_a data/samples/0img0.ppm  \
---input_b data/samples/0img1.ppm --out ./

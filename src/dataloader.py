@@ -238,11 +238,11 @@ def load_batch(dataset_config, split_name, global_step):
         if dataset_config['PREPROCESS']['scale']:
             image_a = image_a / 255.0
             image_b = image_b / 255.0
-
-        crop = [dataset_config['PREPROCESS']['crop_height'],
-                dataset_config['PREPROCESS']['crop_width']]
-        config_a = config_to_arrays(dataset_config['PREPROCESS']['image_a'])
-        config_b = config_to_arrays(dataset_config['PREPROCESS']['image_b'])
+#
+        #crop = [dataset_config['PREPROCESS']['crop_height'],
+        #        dataset_config['PREPROCESS']['crop_width']]
+        #config_a = config_to_arrays(dataset_config['PREPROCESS']['image_a'])
+        #config_b = config_to_arrays(dataset_config['PREPROCESS']['image_b'])
         
         image_as, image_bs, flows = map(lambda x: tf.expand_dims(x, 0), [image_a, image_b, flow])
         
