@@ -251,7 +251,7 @@ def load_batch(dataset_config, split_name, global_step):
         with tf.device('/cpu:0'):
 
             # TODO FIX Data augmentation
-            """
+
             image_as, image_bs, transforms_from_a, transforms_from_b = \
                 _preprocessing_ops.data_augmentation(image_as,
                                                      image_bs,
@@ -271,7 +271,7 @@ def load_batch(dataset_config, split_name, global_step):
                                                      config_b['spread'],
                                                      config_b['prob'],
                                                      config_b['coeff_schedule'])
-            """
+
             noise_coeff_a = None
             noise_coeff_b = None
 
@@ -323,8 +323,8 @@ def load_batch(dataset_config, split_name, global_step):
                 # Perform flow augmentation using spatial parameters from data augmentation
             
             # TODO uncomment this line if data augmentation was fixed
-            #flows = _preprocessing_ops.flow_augmentation(
-            #    flows, transforms_from_a, transforms_from_b, crop)
+            flows = _preprocessing_ops.flow_augmentation(
+                flows, transforms_from_a, transforms_from_b, crop)
 
             return tf.train.batch([image_as, image_bs, flows],
                                   enqueue_many=True,
