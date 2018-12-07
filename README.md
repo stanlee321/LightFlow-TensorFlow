@@ -8,8 +8,8 @@ The main training procedure is based on **https://github.com/sampepose/flownet2-
 ![lightflow tensorboard Val image](/outputs/output_val.png?raw=true)
 
 ### Actual input/output
-![inputs](/data/samples/0img0.ppm)
-![inputs](/data/samples/0img1.ppm)
+![inputs](/data/samples/0img0.ppm?raw=true)
+![inputs](/data/samples/0img1.ppm?raw=true)
 
 ![lightflow Actual output](/outputs/output.png?raw=true)
 
