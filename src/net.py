@@ -230,7 +230,6 @@ class Net(object):
                     }
                 )
         else:
-            sess.run(tf.global_variables_initializer())
             slim.learning.train(
                 train_op,
                 log_dir,
