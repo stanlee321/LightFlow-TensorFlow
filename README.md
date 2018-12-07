@@ -1,5 +1,5 @@
 # LightFlow Tensorflow/Keras implementation
-Implementation of Optical Flow predictions throught deep learning using LightFlow architecture proposed in **https://arxiv.org/pdf/1804.05830.pdf**
+Implementation of Optical Flow predictions using deep learning **LightFlow** architecture proposed in **[Towards High Performance Video Object Detection for Mobiles](https://arxiv.org/pdf/1804.05830.pdf)**
 
 The main training procedure is based on **https://github.com/sampepose/flownet2-tf** , and the network was builded using keras Keras.
 
