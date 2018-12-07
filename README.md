@@ -16,6 +16,7 @@ The main training procedure is based on **https://github.com/sampepose/flownet2-
 
 # TODOs
 * Fix error with the BatchNorm layer in Keras, model does not converge.
+* Migrate Keras model definition to TensorFlow
 * Work in progress
 # Reference article, thanks
 
