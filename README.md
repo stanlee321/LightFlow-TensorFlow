@@ -7,7 +7,10 @@ The main training procedure is based on **https://github.com/sampepose/flownet2-
 ![lightflow tensorboard Loss](/outputs/tensorboard.png?raw=true)
 ![lightflow tensorboard Val image](/outputs/output_val.png?raw=true)
 
-## Actual output
+### Actual input/output
+![inputs](/data/samples/0img0.ppm)
+![inputs](/data/samples/0img1.ppm)
+
 ![lightflow Actual output](/outputs/output.png?raw=true)
 
 
