@@ -6,7 +6,6 @@ import tensorflow as tf
 from tensorflow.keras import backend as K
 from .flowlib import flow_to_image, write_flow
 import numpy as np
-import numpy as np
 from scipy.misc import imread, imsave
 import uuid
 from .training_schedules import LONG_SCHEDULE
