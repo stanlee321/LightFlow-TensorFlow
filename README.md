@@ -3,10 +3,16 @@ Implementation of Optical Flow predictions throught deep learning using LightFlo
 
 The main training procedure is based on **https://github.com/sampepose/flownet2-tf** , and the network was builded using keras Keras.
 
-[1](flow-f472e876-2c79-4dd2-ba3c-6888fb31589f.png)
+## Tensorbaord logs
+![lightflow tensorboard Loss](/outputs/tensorboard.png?raw=true)
+![lightflow tensorboard Val image](/outputs/output_val.png?raw=true)
+
+## Actual output
+![lightflow Actual output](/outputs/output.png?raw=true)
+
 
 # TODOs
-Error with the BatchNorm layer in Keras in training phase and inference phase
+* Fix error with the BatchNorm layer in Keras, model does not converge.
 
 # Reference article, thanks
 
