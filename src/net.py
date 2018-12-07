@@ -230,14 +230,12 @@ class Net(object):
                     }
                 )
         else:
-            with tf.Session() as sess:
-                saver = tf.train.Saver(max_to_keep=50)
-                sess.run(tf.global_variables_initializer())
-                slim.learning.train(
-                    train_op,
-                    log_dir,
-                    # session_config=tf.ConfigProto(allow_soft_placement=True),
-                    global_step=self.global_step,
-                    save_summaries_secs=60,
-                    number_of_steps=training_schedule['max_iter']
-                )
+            sess.run(tf.global_variables_initializer())
+            slim.learning.train(
+                train_op,
+                log_dir,
+                # session_config=tf.ConfigProto(allow_soft_placement=True),
+                global_step=self.global_step,
+                save_summaries_secs=100,
+                number_of_steps=training_schedule['max_iter']
+            )
