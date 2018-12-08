@@ -22,3 +22,4 @@ The main training procedure is based on **https://github.com/sampepose/flownet2-
 
 * **https://github.com/sampepose/flownet2-tf**
 * **https://arxiv.org/pdf/1804.05830.pdf**
+* **https://github.com/tensorflow/models/blob/master/research/slim/nets/mobilenet_v1.py**

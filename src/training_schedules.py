@@ -6,6 +6,7 @@ LONG_SCHEDULE = {
     'weight_decay': 0.00004,
     'max_iter':100000,
 }
+
 """
 LONG_SCHEDULE = {
     'step_values': [190000, 210000, 220000, 230000, 240000 ],

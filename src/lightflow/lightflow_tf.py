@@ -4,7 +4,8 @@ from tensorflow.keras.layers import Dense, Add, Activation, Dropout, Flatten, Co
 from tensorflow.keras.layers import BatchNormalization, Lambda, Average
 from tensorflow.keras.layers import Concatenate, UpSampling2D 
 from tensorflow.keras.layers import Input
-from tensorflow.keras import backend as K
+
+import tensorflow.contrib.slim as slim
 # Import Own Lib
 from ..depthwise_conv2d import DepthwiseConvolution2D
 from ..net import Net, Mode
@@ -49,7 +50,7 @@ class LightFlow(Net):
     def model(self, inputs, training_schedule, trainable=True, build=False):
         _concat_axis = 3
         alpha = 1.0
-
+        beta = 1.0
         if 'warped' in inputs and 'flow' in inputs and 'brightness_error' in inputs:
             concat_inputs = tf.concat([inputs['input_a'],
                                         inputs['input_b'],
@@ -66,44 +67,46 @@ class LightFlow(Net):
         #################################################
         # ENCODER 
         #################################################
-        if trainable is False:
-            # all new operations will be in test mode from now on
-            K.set_learning_phase(0)
+
         # Conv1_dw / Conv1
-        conv1_dw = _depthwise_convolution2D(concat_inputs, alpha, 6,  (3, 3), strides=(2, 2), training=trainable)
-        conv1 = _convolution2D(conv1_dw, alpha, 32, (1, 1), strides=(1, 1), training=trainable)
-
+        conv1_dw = self.depthwiseconv(concat_inputs, 6, beta, 2, (3,3), 'conv1_dw')
+        conv1 =  self.conv_2d(conv1_dw, 32, alpha, 1, (1,1), 'conv1_dw')
+ 
         # Conv2_dw / Conv2
-        conv2_dw = _depthwise_convolution2D(conv1, alpha, 32, (3, 3), strides=(2, 2), training=trainable)
-        conv2 = _convolution2D(conv2_dw, alpha, 64, (1, 1), strides=(1, 1), training=trainable)
-        
+        conv2_dw = self.depthwiseconv(conv1, 32, beta, 2, (3,3), 'conv1_dw')
+        conv2 = self.conv_2d(conv2_dw, 64, alpha, 1, (1,1), 'conv2')
+       
         # Conv3_dw / Conv3
-        conv3_dw = _depthwise_convolution2D(conv2, alpha, 64,  (3, 3), strides=(2, 2), training=trainable)
-        conv3 = _convolution2D(conv3_dw, alpha, 128, (1, 1), strides=(1, 1), training=trainable)
+        conv3_dw = self.depthwiseconv(conv2, 64, beta, 2, (3,3), 'conv3_dw')
+        conv3 = self.conv_2d(conv3_dw, 128, alpha, 1, (1,1), 'conv3')
 
+ 
         # Conv4a_dw / Conv4a
-        conv4a_dw = _depthwise_convolution2D(conv3, alpha, 128,  (3, 3), strides=(2, 2), training=trainable)
-        conv4a = _convolution2D(conv4a_dw, alpha, 256, (1, 1), strides=(1, 1), training=trainable)
+        conv4a_dw = self.depthwiseconv(conv3, 128, beta, 2, (3,3), 'conv4a_dw')
+        conv4a = self.conv_2d(conv4a_dw, 256, alpha, 1, (1,1), 'conv4a')
 
-        # Conv4b_dw / Conv4b
-        conv4b_dw = _depthwise_convolution2D(conv4a, alpha, 256,  (3, 3), strides=(1, 1), training=trainable)
-        conv4b = _convolution2D(conv4b_dw, alpha, 256, (1, 1), strides=(1, 1), training=trainable)
+
+        # Conv4b_dw / Conv4b1
+        conv4b_dw = self.depthwiseconv(conv4a, 256, beta, 1, (3,3), 'conv4b_dw')
+        conv4b = self.conv_2d(conv4b_dw, 256, alpha, 1, (1,1), 'conv4b')
+
 
         # Conv5a_dw / Conv5a
-        conv5a_dw = _depthwise_convolution2D(conv4b, alpha, 256,  (3, 3), strides=(2, 2), training=trainable)
-        conv5a = _convolution2D(conv5a_dw, alpha, 512, (1, 1), strides=(1, 1) , training=trainable)
+        conv5a_dw = self.depthwiseconv(conv4b, 256, beta, 2, (3,3), 'conv5a_dw')
+        conv5a = self.conv_2d(conv5a_dw, 512, alpha, 1, (1,1), 'conv5a' )
+
 
         # Conv5b_dw / Conv5b
-        conv5b_dw = _depthwise_convolution2D(conv5a, alpha, 512,  (3, 3), strides=(1, 1), training=trainable)
-        conv5b = _convolution2D(conv5b_dw, alpha, 512, (1, 1), strides=(1, 1), training=trainable )
+        conv5b_dw = self.depthwiseconv(conv5a, 512, beta, 1, (3,3), 'conv5b_dw')
+        conv5b = self.conv_2d(conv5b_dw, 512, alpha, 1, (1,1), 'conv5b')
 
         # Conv6a_dw / Conv6a
-        conv6a_dw = _depthwise_convolution2D(conv5b, alpha, 512,  (3, 3), strides=(2, 2), training=trainable)
-        conv6a = _convolution2D(conv6a_dw, alpha, 1024, (1, 1), strides=(1, 1), training=trainable)
+        conv6a_dw = self.depthwiseconv(conv5b, 512, beta, 2, (3,3), 'conv6a_dw')
+        conv6a = self.conv_2d(conv6a_dw, 1024, alpha, 1, (1,1), 'conv6a')
 
         # Conv6b_dw / Conv6b
-        conv6b_dw = _depthwise_convolution2D(conv6a, alpha, 1024,  (3, 3), strides=(1, 1), training=trainable)
-        conv6b =  _convolution2D(conv6b_dw, alpha, 1024, (1, 1), strides=(1, 1), training=trainable)
+        conv6b_dw = self.depthwiseconv(conv6a, 1024, beta, 1, (3,3), 'conv6b_dw')
+        conv6b = self.conv_2d(conv6b_dw, 1024, alpha, 1, (1,1), 'conv6b')
 
         #################################################
         # DECODER 
@@ -195,6 +198,40 @@ class LightFlow(Net):
             'flow': flow
         }
 
+    @staticmethod
+    def depthwiseconv(inputs, num_pwc_filters, depth_multiplier, stride, kernel, sc):
+        """ Helper function to build the depth-wise separable convolution layer.
+        """
+        # skip pointwise by setting num_outputs=None
+        depthwise_conv = slim.separable_convolution2d(inputs,
+                                                    num_outputs=None,
+                                                    stride=stride,
+                                                    depth_multiplier=depth_multiplier,
+                                                    kernel_size=kernel,
+                                                    scope=sc+'/depthwise_conv',
+                                                    activation_fn=None)
+        # Set BN
+        bn = slim.batch_norm(depthwise_conv, scope=sc+'/dw_batch_norm')
+        
+        #depthwise_conv = tf.nn.leaky_relu(bn, alpha=0.1, name=sc + '/leaky_relu')
+        depthwise_conv = LeakyReLU(bn, leak=0.1, name= sc + '/leaky_relu')
+        return depthwise_conv
+
+    @staticmethod
+    def conv_2d(features, num_pwc_filters, width_multiplier, stride, kernel_size, sc):
+        num_pwc_filters = round(num_pwc_filters * width_multiplier)
+
+        _stride = stride #2 if downsample else 1
+
+        conv = slim.convolution2d(features,
+                                            num_pwc_filters,
+                                            kernel_size=kernel_size,
+                                            scope=sc+'/pointwise_conv',
+                                            activation_fn=None)
+        bn = slim.batch_norm(conv, scope=sc+'/pw_batch_norm')
+        conv= LeakyReLU(bn, leak=0.1, name= sc + '/leaky_relu')
+        return conv
+        
     def loss(self, flow, predictions):
         # L2 loss between predict_flow, concat_input(img_a,img_b)
         predicted_flow = predictions['flow']
