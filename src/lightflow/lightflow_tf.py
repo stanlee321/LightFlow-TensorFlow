@@ -1,5 +1,5 @@
 import tensorflow as tf
-from ..utils import  average_endpoint_error
+from ..utils import  average_endpoint_error, LeakyReLU
 from tensorflow.keras.layers import Dense, Add, Activation, Dropout, Flatten, Conv2D, MaxPooling2D, LeakyReLU
 from tensorflow.keras.layers import BatchNormalization, Lambda, Average
 from tensorflow.keras.layers import Concatenate, UpSampling2D 
@@ -113,36 +113,40 @@ class LightFlow(Net):
         #################################################
         
         # Conv7_dw / Conv7
-        conv7_dw =  _depthwise_convolution2D(conv6b, alpha, 1024,  (3, 3), strides=(1, 1), training=trainable)
-        conv7 = _convolution2D(conv7_dw, alpha, 256, (1, 1), strides=(1, 1) , training=trainable)
+        conv7_dw = self.depthwiseconv(conv6b, 1024, beta, 1, (3,3), 'conv7_dw')
+        conv7 = self.conv_2d(conv7_dw, 256, alpha, 1, (1,1), 'conv7')
 
         # Conv8_dw /Conv8
-        conv7_resized_tensor = Lambda(resize_like, arguments={'ref_tensor':conv7, 'scale': 2})(conv7)
-        concat_op1 = Concatenate(axis=_concat_axis)([conv7_resized_tensor, conv5b])
-        
-        conv8_dw = _depthwise_convolution2D(concat_op1, alpha, 768,  (3, 3), strides=(1, 1), training=trainable)
-        conv8 = _convolution2D(conv8_dw, alpha, 128, (1, 1), strides=(1, 1), training=trainable )
+        # Operations
+        conv7_resized_tensor = resize_like(conv7, conv7, 2)
+        concat_op1 = tf.concat([conv7_resized_tensor, conv5b], axis=_concat_axis, name='concat_op1')
+        # Convolutions
+        conv8_dw = self.depthwiseconv(concat_op1, 768, beta, 1, (3,3), 'conv8_dw')
+        conv8 = self.conv_2d(conv8_dw, 128, alpha, 1, (1,1), 'conv8')
 
         # Conv9_dw /Conv9
-        conv8_resized_tensor = Lambda(resize_like, arguments={'ref_tensor':conv8, 'scale': 2})(conv8)
-        concat_op2 = Concatenate(axis=_concat_axis)([conv8_resized_tensor, conv4b])
-        
-        conv9_dw = _depthwise_convolution2D(concat_op2, alpha, 384, (3,3), strides=(1,1), training=trainable)
-        conv9 = _convolution2D(conv9_dw, alpha, 64, (1,1), strides=(1,1), training=trainable)
+        # Operations
+        conv8_resized_tensor = resize_like(conv8, conv8, 2)
+        concat_op2 = tf.concat([conv8_resized_tensor, conv4b], axis=_concat_axis, name='concat_op2')
+        #Convolutions
+        conv9_dw = self.depthwiseconv(concat_op2, 384, beta, 1, (3,3), 'conv9_dw')
+        conv9 = self.conv_2d(conv9_dw, 64, alpha, 1, (1,1), 'conv9')
 
         # Conv10_dw / Conv10
-        coonv9_resized_tensor = Lambda(resize_like, arguments={'ref_tensor':conv9, 'scale': 2})(conv9)
-        concat_op3 = Concatenate(axis=_concat_axis)([coonv9_resized_tensor, conv3])
-
-        conv10_dw = _depthwise_convolution2D(concat_op3, alpha, 192, (3,3), strides=(1,1), training=trainable)
-        conv10 = _convolution2D(conv10_dw, alpha, 32, (1,1), strides=(1,1), training=trainable )
+        # Operations
+        coonv9_resized_tensor = resize_like(conv9, conv9, 2)
+        concat_op3 = tf.concat([coonv9_resized_tensor, conv3], axis=_concat_axis, name='concat_op3')
+        #Convolutions
+        conv10_dw = self.depthwiseconv(concat_op3, 192, beta, 1, (3,3), 'conv10_dw')
+        conv10 = self.conv_2d(conv10_dw, 32, alpha, 1, (1,1), 'conv10')
 
         # Conv11_dw / Con11
-        conv10_resized_tensor = Lambda(resize_like, arguments={'ref_tensor':conv10, 'scale': 2})(conv10)
-        concat_op3 = Concatenate(axis=_concat_axis)([conv10_resized_tensor, conv2])
-
-        conv11_dw = _depthwise_convolution2D(concat_op3, alpha, 96, (3,3), strides=(1,1), training=trainable)
-        conv11 = _convolution2D(conv11_dw, alpha, 16, (1,1), strides=(1,1) , training=trainable)
+        # Operations
+        conv10_resized_tensor = resize_like(conv10, conv10, 2)
+        concat_op3 = tf.concat([conv10_resized_tensor, conv2], axis=_concat_axis, name='concat_op3')
+        # Convolutions
+        conv11_dw = self.depthwiseconv(concat_op3, 96, beta, 1, (3,3), 'conv11_dw')
+        conv11 = self.conv_2d(conv11_dw, 16, alpha, 1, (1,1),'conv11')
 
 
         ##################################################
@@ -150,34 +154,33 @@ class LightFlow(Net):
         ##################################################
 
         # Conv12_dw / conv12
-        conv12_dw = _depthwise_convolution2D(conv7, alpha, 256, (3,3), strides = (1,1), training=trainable)
-        conv12 = _convolution2D(conv12_dw, alpha, 2, (1,1), strides=(1,1), training=trainable )
-
+        conv12_dw = self.depthwiseconv(conv7, 256, beta, 1, (3,3), 'conv12_dw')
+        conv12 = self.conv_2d(conv12_dw, 2, alpha, 1, (1,1), 'conv12')
+        
         # Conv13_dw / conv13
-        conv13_dw = _depthwise_convolution2D(conv8, alpha, 128, (3,3), strides = (1,1), training=trainable)
-        conv13 = _convolution2D(conv13_dw, alpha, 2, (1,1), strides=(1,1), training=trainable )
+        conv13_dw = self.depthwiseconv(conv8, 128, beta, 1, (3,3), 'conv13_dw')
+        conv13 = self.conv_2d(conv13_dw, 2, alpha, 1, (1,1), 'conv13')
 
         # Conv14_dw / conv14
-        conv14_dw = _depthwise_convolution2D(conv9, alpha, 64, (3,3), strides=(1,1), training=trainable)
-        conv14 = _convolution2D(conv14_dw, alpha, 2, (1,1), strides=(1,1), training=trainable )
+        conv14_dw = self.depthwiseconv(conv9, 64, beta, 1, (3,3), 'conv14_dw')
+        conv14 = self.conv_2d(conv14_dw, 2, alpha, 1, (1,1), 'conv14')
 
         # Conv15_dw / con15
-        conv15_dw = _depthwise_convolution2D(conv10, alpha, 32, (3,3), strides=(1,1), training=trainable)
-        conv15 = _convolution2D(conv15_dw, alpha, 2, (1,1), strides=(1,1), training=trainable )
+        conv15_dw = self.depthwiseconv(conv10, 32, beta, 1, (3,3), 'conv15_dw')
+        covn15 = self.conv_2d(conv15_dw, 2, alpha, 1, (1,1), 'conv15')
 
         # Conv16_dw / conv16
-        conv16_dw = _depthwise_convolution2D(conv11, alpha, 16, (3,3), strides=(1,1), training=trainable)
-        conv16 = _convolution2D(conv16_dw, alpha, 2, (1,1), strides=(1,1), training=trainable)
+        conv16_dw = self.depthwiseconv(conv11, 16, beta, 1, (3,3), 'conv16_dw')
+        conv16 = self.conv_2d(conv16_dw, 2, alpha, 1, (1,1), 'conv16')
 
 
         ###################################################
         # Multiple Optical Flow Predictions Fusion
         ###################################################
-
-        conv12_resized_tensor_x16 = Lambda(resize_like, arguments={'ref_tensor':conv12, 'scale': 16})(conv12)
-        conv13_resized_tensor_x8 = Lambda(resize_like, arguments={'ref_tensor':conv13, 'scale': 8})(conv13)
-        conv14_resized_tensor_x4 = Lambda(resize_like, arguments={'ref_tensor':conv14, 'scale': 4})(conv14)
-        conv15_resized_tensor_x2 = Lambda(resize_like, arguments={'ref_tensor':conv15, 'scale': 2})(conv15)
+        conv12_resized_tensor_x16 = resize_like(conv12, conv12, 16)
+        conv13_resized_tensor_x8  = resize_like(conv13, conv13, 8)
+        conv14_resized_tensor_x4  = resize_like(conv14, conv14, 4)
+        conv15_resized_tensor_x2  = resize_like(conv15, conv15, 2)
         
         # 96x128x2
         flow = Average(name='average_layer')([conv12_resized_tensor_x16, 
