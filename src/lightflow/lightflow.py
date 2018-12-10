@@ -10,7 +10,7 @@ from ..utils import  average_endpoint_error, LeakyReLU
 try:
     from ..downsample import downsample
 except Exception as e:
-    print('Running from Computer without GPU')
+    print('Running without GPU')
     downsample = None
 
 
