@@ -40,7 +40,8 @@ class LightFlow(Net):
             # INPUT_SHAPE = (384, 512,6)
             concat_inputs = tf.concat([inputs['input_a'], inputs['input_b']], axis=_concat_axis, name='inputs')
         
-        is_training = tf.placeholder(tf.bool)
+        #is_training = tf.placeholder(tf.bool)
+        is_training = trainable
         LightFlow.weight_reg = slim.l2_regularizer(training_schedule['weight_decay'])
 
         with tf.variable_scope('LightFlow', [concat_inputs]):
@@ -195,8 +196,8 @@ class LightFlow(Net):
                                                     activation_fn=None,
                                                     weights_regularizer=weights_regularizer)
         # Set BN
-        if batchnorm_istraining is not False:
-            depthwise_conv = LightFlow.bn(depthwise_conv, batchnorm_istraining, sc)
+        if batchnorm_istraining is not None:
+            depthwise_conv = LightFlow.bn(depthwise_conv, batchnorm_istraining, sc+'/depthwise_conv' )
         #depthwise_conv = tf.nn.leaky_relu(bn, alpha=0.1, name=sc + '/leaky_relu')
         depthwise_conv = LeakyReLU(depthwise_conv, leak=0.1, name= sc + '/leaky_relu')
         return depthwise_conv
@@ -216,12 +217,12 @@ class LightFlow(Net):
                                 weights_regularizer = weights_regularizer)
         # Set BN
         if batchnorm_istraining is not False:
-            conv = LightFlow.bn(conv, batchnorm_istraining, sc)
+            conv = LightFlow.bn(conv, batchnorm_istraining, sc+'/pointwise_conv')
         conv= LeakyReLU(conv, leak=0.1, name= sc + '/leaky_relu')
         return conv
     @staticmethod
     def bn(inputs, is_training, sc):
-        with tf.variable_scope(sc + '/bn'):
+        with tf.variable_scope(sc):
             normalized = tf.layers.batch_normalization(
                 inputs=inputs,
                 axis=-1,
