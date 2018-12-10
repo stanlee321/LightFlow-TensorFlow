@@ -1,7 +1,7 @@
 from ..dataloader import load_batch
 from ..dataset_configs import FLYING_CHAIRS_DATASET_CONFIG
 from ..training_schedules import LONG_SCHEDULE
-from .lightflow_tf import LightFlow
+from .lightflow import LightFlow
 
 # Create a new network
 net = LightFlow()
@@ -24,5 +24,5 @@ net.train(
     #checkpoints = {
     #    '../../logs/lightflow/model.ckpt-9468': ('lightflow/lightflow', 'lightflow')
     #}
-    checkpoints = 'latest'
+    checkpoints = False #'latest'
 )
