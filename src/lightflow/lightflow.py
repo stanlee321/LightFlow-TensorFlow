@@ -197,8 +197,8 @@ class LightFlow(Net):
         # Set BN
         if batchnorm_istraining is not None:
             depthwise_conv = LightFlow.bn(depthwise_conv, batchnorm_istraining, sc+'/depthwise_conv' )
-        #depthwise_conv = tf.nn.leaky_relu(bn, alpha=0.1, name=sc + '/leaky_relu')
-        depthwise_conv = LeakyReLU(depthwise_conv, leak=0.1, name= sc + '/leaky_relu')
+        depthwise_conv = tf.nn.leaky_relu(depthwise_conv, alpha=0.1, name=sc + '/leaky_relu')
+        #depthwise_conv = LeakyReLU(depthwise_conv, leak=0.1, name= sc + '/leaky_relu')
         return depthwise_conv
 
     @staticmethod
@@ -217,7 +217,8 @@ class LightFlow(Net):
         # Set BN
         if batchnorm_istraining is not False:
             conv = LightFlow.bn(conv, batchnorm_istraining, sc+'/pointwise_conv')
-        conv= LeakyReLU(conv, leak=0.1, name= sc + '/leaky_relu')
+        conv = tf.nn.leaky_relu(conv, alpha=0.1, name=sc + '/leaky_relu')
+        #conv= LeakyReLU(conv, leak=0.1, name= sc + '/leaky_relu')
         return conv
     @staticmethod
     def bn(inputs, is_training, sc):
