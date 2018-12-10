@@ -185,6 +185,8 @@ class LightFlow(Net):
         """ Helper function to build the depth-wise separable convolution layer.
         """
         weights_regularizer = LightFlow.weight_reg
+        #weights_regularizer = None
+
         # skip pointwise by setting num_outputs=None
         depthwise_conv = slim.separable_convolution2d(inputs,
                                                     num_outputs=None,
@@ -207,7 +209,7 @@ class LightFlow(Net):
 
         _stride = stride #2 if downsample else 1
         weights_regularizer = LightFlow.weight_reg
-
+        #weights_regularizer = None
         conv = slim.convolution2d(features,
                                 num_pwc_filters,
                                 kernel_size=kernel_size,
@@ -215,7 +217,7 @@ class LightFlow(Net):
                                 activation_fn=None,
                                 weights_regularizer = weights_regularizer)
         # Set BN
-        if batchnorm_istraining is not False:
+        if batchnorm_istraining is not None:
             conv = LightFlow.bn(conv, batchnorm_istraining, sc+'/pointwise_conv')
         conv = tf.nn.leaky_relu(conv, alpha=0.1, name=sc + '/leaky_relu')
         #conv= LeakyReLU(conv, leak=0.1, name= sc + '/leaky_relu')
