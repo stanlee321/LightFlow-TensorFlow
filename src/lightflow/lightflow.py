@@ -1,12 +1,11 @@
 import tensorflow as tf
-from ..utils import  average_endpoint_error, LeakyReLU
+import tensorflow.contrib.slim as slim
 from tensorflow.keras.layers import Average
 
-import tensorflow as tf
-import tensorflow.contrib.slim as slim
 # Import Own Lib
 from ..depthwise_conv2d import DepthwiseConvolution2D
 from ..net import Net, Mode
+from ..utils import  average_endpoint_error, LeakyReLU
 
 try:
     from ..downsample import downsample
