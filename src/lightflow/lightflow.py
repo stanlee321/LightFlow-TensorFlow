@@ -224,6 +224,8 @@ class LightFlow(Net):
         return conv
     @staticmethod
     def bn(inputs, is_training, sc):
+        return slim.batch_norm(inputs, is_training=is_training, scope=sc)
+        """
         with tf.variable_scope(sc):
             normalized = tf.layers.batch_normalization(
                 inputs=inputs,
@@ -235,6 +237,7 @@ class LightFlow(Net):
                 training=is_training,
             )
             return normalized
+        """
 
     def loss(self, flow, predictions):
         # L2 loss between predict_flow, concat_input(img_a,img_b)
