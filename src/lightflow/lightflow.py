@@ -80,7 +80,7 @@ class LightFlow(Net):
                                     is_training=is_training,
                                     activation_fn=None,
                                     fused=True):
-                    with slim.arg_scope([slim.convolution2d], weights_regularizer=weights_regularizer):
+                    with slim.arg_scope([slim.convolution2d, slim.separable_convolution2d], weights_regularizer=weights_regularizer):
 
                         with tf.variable_scope('encoder'):
                             # #################################################
