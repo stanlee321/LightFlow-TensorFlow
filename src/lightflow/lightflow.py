@@ -184,8 +184,8 @@ class LightFlow(Net):
     def depthwiseconv(inputs, num_pwc_filters, depth_multiplier, stride, kernel, sc, batchnorm_istraining=None):
         """ Helper function to build the depth-wise separable convolution layer.
         """
-        weights_regularizer = LightFlow.weight_reg
-        #weights_regularizer = None
+        #weights_regularizer = LightFlow.weight_reg
+        weights_regularizer = None
 
         # skip pointwise by setting num_outputs=None
         depthwise_conv = slim.separable_convolution2d(inputs,
@@ -208,8 +208,8 @@ class LightFlow(Net):
         num_pwc_filters = round(num_pwc_filters * width_multiplier)
 
         _stride = stride #2 if downsample else 1
-        weights_regularizer = LightFlow.weight_reg
-        #weights_regularizer = None
+        #weights_regularizer = LightFlow.weight_reg
+        weights_regularizer = None
         conv = slim.convolution2d(features,
                                 num_pwc_filters,
                                 kernel_size=kernel_size,
