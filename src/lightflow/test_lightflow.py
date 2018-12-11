@@ -41,6 +41,5 @@ def test_model():
         inspect_variables(slim.get_variables(scope="LightFlow"))
         print("Inputs/Outputs:")
         inspect_variables([inputs, outputs])
-
 if __name__ == '__main__':
     test_model()
