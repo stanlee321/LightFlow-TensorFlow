@@ -3,3 +3,4 @@ logs/
 src/__pycache__/
 src/lightflow/__pycache__/
 src/lightflow/__pycache__/*.pyc
+checkpoints/
