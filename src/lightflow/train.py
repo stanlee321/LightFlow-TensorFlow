@@ -24,5 +24,5 @@ net.train(
     #checkpoints = {
     #    '../../logs/lightflow/model.ckpt-9468': ('lightflow/lightflow', 'lightflow')
     #}
-    checkpoints = False # 'latest'
+    checkpoints = 'latest'
 )

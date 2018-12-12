@@ -119,9 +119,9 @@ class Net(object):
                     restorer.restore(sess, checkpoint_path)
         """
         if checkpoints == 'latest':
+            print('>>>>Loading latest')
             tf.train.latest_checkpoint(
-            checkpoint_dir,
-            latest_filename='model.ckpt-9468')
+            checkpoint_dir)
 
         # Show the generated flow in TensorBoard
         if 'flow' in predictions:
