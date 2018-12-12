@@ -130,9 +130,9 @@ class LightFlow(Net):
 
         # Conv11_dw / Con11
         conv10_resized_tensor = Lambda(resize_like, arguments={'ref_tensor':conv10, 'scale': 2})(conv10)
-        concat_op3 = Concatenate(axis=_concat_axis)([conv10_resized_tensor, conv2])
+        concat_op4 = Concatenate(axis=_concat_axis)([conv10_resized_tensor, conv2])
 
-        conv11_dw = _depthwise_convolution2D(concat_op3, alpha, 96, (3,3), strides=(1,1))
+        conv11_dw = _depthwise_convolution2D(concat_op4, alpha, 96, (3,3), strides=(1,1))
         conv11 = _convolution2D(conv11_dw, alpha, 16, (1,1), strides=(1,1) )
 
 
