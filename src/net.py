@@ -178,6 +178,9 @@ class Net(object):
         total_loss = self.loss(flow, predictions)
         tf.summary.scalar('loss', total_loss)
 
+        # plot learning rate
+        tf.summary.scalar('Learning Rate', self.learning_rate)
+        
         #checkpoint_dir = './logs/lightflow/model.ckpt-9468'
         #checkpoint_dir = './logs/lightflow/model.ckpt-75000'
         checkpoint_dir = './logs/lightflow/'
