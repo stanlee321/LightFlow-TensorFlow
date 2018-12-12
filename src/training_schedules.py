@@ -3,7 +3,7 @@ LONG_SCHEDULE = {
     'learning_rates': [0.1, 0.001, 0.00001, 0.001/2, (0.001/2)/2, ((0.001/2)/2)/2, (((0.001/2)/2)/2)/2],
     'momentum': 0.9,
     'momentum2': 0.999,
-    'weight_decay': 0.0004,
+    'weight_decay': 0.00004,
     'max_iter':75000,
 }
 
