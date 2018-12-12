@@ -71,8 +71,7 @@ class LightFlow(Net):
         with tf.variable_scope('LightFlow', [concat_inputs]):
             # Fusion Network
             with slim.arg_scope([slim.convolution2d, slim.separable_convolution2d],
-                                activation_fn=None,
-                                weights_regularizer=weights_regularizer):
+                                activation_fn=None): #, weights_regularizer=weights_regularizer):
                 with slim.arg_scope([slim.batch_norm],
                                     is_training=is_training,
                                     activation_fn=LeakyReLU,
