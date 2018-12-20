@@ -1,8 +1,8 @@
 import cv2
 import os
 import sys
-from .flowprocessor import ImageProcessor
-from .flowlib import flow_to_image, write_flow
+from flowprocessor import ImageProcessor
+from flowlib import flow_to_image, write_flow
 import tensorflow as tf
 import time
 
