@@ -153,6 +153,7 @@ class Net(object):
             tf.train.write_graph(graphdef, output_path, 'lightflow.pbtxt', as_text=True)
 
     def train(self, log_dir, training_schedule, input_a, input_b, flow, checkpoints=None):
+
         tf.summary.image("image_a", input_a, max_outputs=2)
         tf.summary.image("image_b", input_b, max_outputs=2)
 
@@ -174,41 +175,43 @@ class Net(object):
             'input_a': input_a,
             'input_b': input_b
         }
+
+        # Forwad propagation
         predictions = self.model(inputs, training_schedule)
+
+        # Get the loss
         total_loss = self.loss(flow, predictions)
-        tf.summary.scalar('loss', total_loss)
 
         # plot learning rate
+        tf.summary.scalar('loss', total_loss)
         tf.summary.scalar('Learning Rate', self.learning_rate)
-        
-        #checkpoint_dir = './logs/lightflow/model.ckpt-9468'
-        #checkpoint_dir = './logs/lightflow/model.ckpt-75000'
+
         checkpoint_dir = './logs/lightflow/'
 
-        if checkpoints == 'latest':
-            print('[INFO]>>>>>>> restoring...')
-            print(checkpoint_dir)
-            #restorer = tf.train.Saver(max_to_keep=100)
-            #with tf.Session() as sess:
-            #    restorer.restore(sess, checkpoint_dir)
-            tf.train.latest_checkpoint(
-            checkpoint_dir,
-            latest_filename=None)
-
+        if load_last_checkpoint:
+            print('[INFO]>>>>>>> restoring... {}'.format(checkpoint_dir))
+            tf.train.latest_checkpoint( checkpoint_dir,
+                                        latest_filename=None)
 
         # Show the generated flow in TensorBoard
         if 'flow' in predictions:
+            # Pred Flow img0
             pred_flow_0 = predictions['flow'][0, :, :, :]
             pred_flow_0 = tf.py_func(flow_to_image, [pred_flow_0], tf.uint8)
+            # Pred Flow img1
             pred_flow_1 = predictions['flow'][1, :, :, :]
             pred_flow_1 = tf.py_func(flow_to_image, [pred_flow_1], tf.uint8)
+
             pred_flow_img = tf.stack([pred_flow_0, pred_flow_1], 0)
             tf.summary.image('pred_flow', pred_flow_img, max_outputs=2)
-
+        
+        # True flow img0
         true_flow_0 = flow[0, :, :, :]
         true_flow_0 = tf.py_func(flow_to_image, [true_flow_0], tf.uint8)
+        # True flow img1
         true_flow_1 = flow[1, :, :, :]
         true_flow_1 = tf.py_func(flow_to_image, [true_flow_1], tf.uint8)
+
         true_flow_img = tf.stack([true_flow_0, true_flow_1], 0)
         tf.summary.image('true_flow', true_flow_img, max_outputs=2)
 

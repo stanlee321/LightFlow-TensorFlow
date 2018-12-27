@@ -3,7 +3,6 @@ import tensorflow.contrib.slim as slim
 from tensorflow.keras.layers import Average
 
 # Import Own Lib
-from ..depthwise_conv2d import DepthwiseConvolution2D
 from ..net import Net, Mode
 from ..utils import  average_endpoint_error, LeakyReLU
 
@@ -28,17 +27,9 @@ class LightFlow(Net):
         _concat_axis = 3
         alpha = 1.0
         beta = 1.0
-        if 'warped' in inputs and 'flow' in inputs and 'brightness_error' in inputs:
-            concat_inputs = tf.concat([inputs['input_a'],
-                                        inputs['input_b'],
-                                        inputs['warped'],
-                                        inputs['flow'],
-                                        inputs['brightness_error']], axis=_concat_axis)
-        else:
-            # INPUT_SHAPE = (384, 512,6)
-            concat_inputs = tf.concat([inputs['input_a'], inputs['input_b']], axis=_concat_axis, name='inputs')
+        # Expected INPUT_SHAPE = (384, 512,6)
+        concat_inputs = tf.concat([inputs['input_a'], inputs['input_b']], axis=_concat_axis, name='inputs')
         
-        #is_training = tf.placeholder(tf.bool)
         is_training = trainable
         weights_regularizer = slim.l2_regularizer(training_schedule['weight_decay'])
 
@@ -148,6 +139,7 @@ class LightFlow(Net):
                     conv14_x4,
                     conv15_x2, 
                     conv16])
+
                 # Fuse groundtrunth resolution with prediction
                 #flow = tf.image.resize_bilinear(average, tf.stack([height, width]), align_corners=True)
                 #flow = Lambda(resize_like, arguments={'ref_tensor':average, 'scale': 4})(average)
@@ -168,20 +160,24 @@ class LightFlow(Net):
                                                     depth_multiplier=depth_multiplier,
                                                     kernel_size=[3,3],
                                                     scope=sc+'/depthwise_conv',
-                                                    activation_fn=None)
+                                                    activation_fn=None,
+                                                    trainable=batchnorm_istraining,
+                                                    weights_initializer=slim.variance_scaling_initializer())
         # Set BN
         bn = LightFlow.batch_norm(depthwise_conv_logit, batchnorm_istraining, sc+'/dw_batch_norm')
         
-        depthwise_conv = LeakyReLU(bn)
+        depthwise_conv = tf.nn.leaky_relu(bn, alpha=0.1)
 
         pointwise_conv_logit = slim.convolution2d(depthwise_conv, num_pwc_filters,
                                             kernel_size=[1,1],
                                             scope=sc+'/pointwise_conv',
                                             weights_regularizer=l2_reg,
-                                            activation_fn=None)
+                                            activation_fn=None,
+                                            trainable=batchnorm_istraining,
+                                            weights_initializer=slim.variance_scaling_initializer())
         # Set BN
         bn = LightFlow.batch_norm(pointwise_conv_logit, batchnorm_istraining, sc+'/pw_batch_norm')
-        pointwise_conv = LeakyReLU(bn)
+        pointwise_conv = tf.nn.leaky_relu(bn, alpha=0.1)
         return pointwise_conv
 
     @staticmethod
