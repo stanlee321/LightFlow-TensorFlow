@@ -10,8 +10,6 @@ from scipy.misc import imread, imsave
 import uuid
 from .training_schedules import LONG_SCHEDULE
 
-slim = tf.contrib.slim
-
 
 class Mode(Enum):
     TRAIN = 1
