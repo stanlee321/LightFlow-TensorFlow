@@ -34,10 +34,10 @@ class DWPW2D(Layer):
             Output tensor.
         """
         _channel_axis = 3
-
+        self.alpha= tf.cast(alpha, tf.float32)
         self.dw_conv = DepthwiseConv2D(kernel_size=(3, 3), 
                             strides=(stride, stride),
-                            depth_multiplier=alpha,
+                            depth_multiplier=self.alpha,
                             padding='same')
 
         # x = BatchNormalization(axis=self._channel_axis)(x)
@@ -61,7 +61,7 @@ class DWPW2D(Layer):
         
 
 
-class Encoder(Model):
+class Encoder(Layer):
 
     def __init__(self, alpha=1):
         super(Encoder, self).__init__()
@@ -127,7 +127,7 @@ class Encoder(Model):
         return (conv6b, conv5b, conv4b, conv3, conv2 )
 
 
-class Decoder(Model):
+class Decoder(Layer):
     def __init__(self, alpha=1):
         super(Decoder, self).__init__()
         
@@ -159,12 +159,17 @@ class Decoder(Model):
     def concat(self, input_1, input_2, name):
         return tf.concat([input_1, input_2], axis=self._concat_axis, name=name)
 
-    def call(self, conv2, conv3, conv4b, conv5b, conv6b):
+    def call(self, args):
 
         #################################################
         # DECODER 
         #################################################
-        
+        conv2 = args['conv2']
+        conv3 = args['conv3']
+        conv4b = args['conv4b']
+        conv5b = args['conv5b']
+        conv6b = args['conv6b']
+
         # Conv7_dw / Conv7
         conv7 = self.conv7(conv6b)
 
@@ -249,11 +254,10 @@ class LightFlow(Model):
         conv6b, conv5b, conv4b, conv3, conv2  = self.encoder(x)
         
         # Decoder
-        conv11, conv10, conv9, conv8, conv7 = self.decoder(conv2, 
-                                                        conv3,
-                                                        conv4b, 
-                                                        conv5b, 
-                                                        conv6b)
+        kargs ={'conv2': conv2,'conv3': conv3, 'conv4b': conv4b, 
+                'conv5b': conv5b, 'conv6b':conv6b}
+
+        conv11, conv10, conv9, conv8, conv7 = self.decoder(inputs=kargs)
 
         ##################################################
         # Optical Flow Predictions
