@@ -31,4 +31,3 @@ plt.ylabel("Learning Rate")
 plt.xlabel("Train Step")
 plt.show()
 
-loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)

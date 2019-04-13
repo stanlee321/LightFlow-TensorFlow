@@ -323,7 +323,7 @@ def load_batch(dataset_config, split_name, global_step):
                 # Perform flow augmentation using spatial parameters from data augmentation
             
             # TODO uncomment this line if data augmentation was fixed
-            #flows = _preprocessing_ops.flow_augmentation(
+            # flows = _preprocessing_ops.flow_augmentation(
             #    flows, transforms_from_a, transforms_from_b, crop)
 
             return tf.train.batch([image_as, image_bs, flows],
