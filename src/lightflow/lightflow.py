@@ -34,8 +34,10 @@ class DWPW2D(Layer):
             Output tensor.
         """
         _channel_axis = 3
-        self.alpha= tf.cast(alpha, tf.float32)
-        self.dw_conv = DepthwiseConv2D(kernel_size=(3, 3), 
+        self.alpha=  alpha# tf.cast(alpha, tf.float32)
+        self.dw_conv = DepthwiseConv2D(
+            data_format="channels_last",
+                            kernel_size=(3, 3), 
                             strides=(stride, stride),
                             depth_multiplier=self.alpha,
                             padding='same')
